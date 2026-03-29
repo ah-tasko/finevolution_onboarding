@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finevolution — Новий клієнт</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: #2a2a3d;
+    --accent: #6c5ce7;
+    --accent2: #a29bfe;
+    --accent3: #fd79a8;
+    --text: #e8e8f0;
+    --text-muted: #7a7a9a;
+    --success: #00b894;
+    --warning: #fdcb6e;
+    --error: #e17055;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+  }
+
+  /* Background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(108,92,231,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -200px; right: -200px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(253,121,168,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Steps indicator */
+  .steps {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 32px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    color: var(--text-muted);
+    background: var(--surface);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .step-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transition: color 0.3s;
+  }
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin: 0 8px;
+    transition: background 0.3s;
+  }
+  .step.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .step.active .step-label { color: var(--text); }
+  .step.done .step-num {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+  .step.done .step-label { color: var(--text-muted); }
+  .step.done + .step-line { background: var(--success); }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .card.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .card-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+
+  /* Form fields */
+  .field-group { margin-bottom: 20px; }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .field-row .field-group { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  label .req { color: var(--accent3); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.15);
+  }
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7a9a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; min-height: 90px; }
+
+  /* Radio-style big options */
+  .option-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .option-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .option-card:hover { border-color: var(--accent2); }
+  .option-card.selected {
+    border-color: var(--accent);
+    background: rgba(108,92,231,0.08);
+  }
+  .option-card input { display: none; }
+  .option-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .option-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .option-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .option-check {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .option-card.selected .option-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .option-card.selected .option-check::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  /* Service checkboxes */
+  .services-container {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .services-container::-webkit-scrollbar { width: 4px; }
+  .services-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .service-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .service-item:last-child { border-bottom: none; }
+  .service-item:hover { background: rgba(108,92,231,0.06); }
+  .service-item.checked { background: rgba(108,92,231,0.1); }
+
+  .service-checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .service-item.checked .service-checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .service-item.checked .service-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .service-name { font-size: 14px; color: var(--text); }
+
+  /* Buttons */
+  .btn {
+    padding: 13px 28px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #8b7cf8);
+    color: white;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(108,92,231,0.35); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--text-muted); }
+
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Tags for selected services */
+  .selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    min-height: 0;
+  }
+  .tag {
+    background: rgba(108,92,231,0.15);
+    border: 1px solid rgba(108,92,231,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--accent2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tag-remove {
+    cursor: pointer;
+    opacity: 0.7;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .tag-remove:hover { opacity: 1; }
+
+  /* AI Processing overlay */
+  .processing-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.9);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .processing-overlay.active { display: flex; }
+
+  .processing-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .processing-log {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 16px;
+    text-align: left;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+    font-family: monospace;
+  }
+  .log-line { margin-bottom: 4px; }
+  .log-line.ok { color: var(--success); }
+  .log-line.err { color: var(--error); }
+  .log-line.info { color: var(--accent2); }
+
+  /* Success screen */
+  .success-card {
+    display: none;
+    width: 100%;
+    max-width: 720px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 60px 36px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+  }
+  .success-card.active { display: block; }
+  .success-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .success-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .success-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; }
+  .success-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .success-link {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: var(--accent2);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .success-link:hover { border-color: var(--accent2); }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 24px 0;
+  }
+
+  /* Highlight tag for "other" */
+  .other-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .other-hint span { color: var(--accent2); }
+
+  /* Config banner */
+  .config-banner {
+    width: 100%;
+    max-width: 720px;
+    background: rgba(253,121,168,0.08);
+    border: 1px solid rgba(253,121,168,0.2);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--warning);
+  }
+</style>
+</head>
+<body>
+
+
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">F</div>
+  <div class="header-text">
+    <h1>Новий клієнт</h1>
+    <p>Finevolution — онбординг менеджера</p>
+  </div>
+</div>
+
+<!-- Steps -->
+<div class="steps">
+  <div class="step active" id="step1-ind">
+    <div class="step-num">1</div>
+    <div class="step-label">Фізична особа</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step" id="step2-ind">
+    <div class="step-num">2</div>
+    <div class="step-label">Компанія</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step" id="step3-ind">
+    <div class="step-num">3</div>
+    <div class="step-label">Послуги</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step" id="step4-ind">
+    <div class="step-num">4</div>
+    <div class="step-label">Підтвердження</div>
+  </div>
+</div>
+
+<!-- STEP 1: Фізична особа -->
+<div class="card active" id="step1">
+  <div class="card-title">Дані фізичної особи</div>
+  <div class="card-subtitle">Контактна інформація клієнта</div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Прізвище <span class="req">*</span></label>
+      <input type="text" id="lastName" placeholder="Іванов" required>
+    </div>
+    <div class="field-group">
+      <label>Ім'я <span class="req">*</span></label>
+      <input type="text" id="firstName" placeholder="Олексій" required>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <label>По батькові</label>
+    <input type="text" id="middleName" placeholder="Миколайович">
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Телефон</label>
+      <input type="tel" id="phone" placeholder="+380 XX XXX XX XX">
+    </div>
+    <div class="field-group">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="client@example.com">
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Канал комунікації</label>
+      <select id="channel">
+        <option value="">— Оберіть —</option>
+        <option value="Telegram">Telegram</option>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Signal">Signal</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Назва чату / нікнейм</label>
+      <input type="text" id="chatName" placeholder="@username або назва групи">
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Країна громадянства</label>
+      <select id="citizenship">
+        <option value="">— Оберіть —</option>
+        <option>Україна</option><option>Болгарія</option><option>Велика Британія</option>
+        <option>Гонконг</option><option>Естонія</option><option>Ірландія</option>
+        <option>Іспанія</option><option>Італія</option><option>Індонезія</option>
+        <option>Канада</option><option>Кіпр</option><option>Мальта</option>
+        <option>Німеччина</option><option>ОАЕ (UAE)</option><option>Польща</option>
+        <option>Румунія</option><option>США</option><option>Угорщина</option>
+        <option>Франція</option><option>Чехія</option><option>Швейцарія</option><option>Литва</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Країна податкового резидентства</label>
+      <select id="taxResidency">
+        <option value="">— Оберіть —</option>
+        <option>Україна</option><option>Кіпр</option><option>Естонія</option>
+        <option>Польща</option><option>Велика Британія</option><option>США</option>
+        <option>ОАЕ</option><option>Нідерланди</option><option>Німеччина</option>
+        <option>Австрія</option><option>Швейцарія</option><option>Мальта</option>
+        <option>Люксембург</option><option>Ірландія</option><option>Інше</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <label>Host AM <span class="req">*</span></label>
+    <select id="hostAm">
+      <option value="">— Оберіть менеджера —</option>
+      <option value="Anzhela Kameneva">Анжела Каменєва</option>
+      <option value="Olena Kucheriuk">Олена Кучерюк</option>
+      <option value="Olesia Padalka">Олеся Падалка</option>
+    </select>
+  </div>
+
+  <div class="field-group">
+    <label>Потенційний запит / нотатки</label>
+    <textarea id="notes" placeholder="Що цікавить клієнта, звідки дізнався, особливі умови..."></textarea>
+  </div>
+
+  <div class="btn-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goToStep(2)">Далі → Компанія</button>
+  </div>
+</div>
+
+<!-- STEP 2: Компанія -->
+<div class="card" id="step2">
+  <div class="card-title">Інформація про компанію</div>
+  <div class="card-subtitle">Введіть дані компанії клієнта</div>
+
+  <div class="field-group">
+    <label>Назва компанії <span class="req">*</span></label>
+    <input type="text" id="companyName" placeholder="Acme Corp Ltd">
+  </div>
+
+  <div class="field-row">
+    <div class="field-group">
+      <label>Юрисдикція <span class="req">*</span></label>
+      <select id="jurisdiction" onchange="loadServices()">
+        <option value="">— Оберіть країну —</option>
+        <option value="Ukraine">🇺🇦 Україна</option>
+        <option value="ESTONIA">🇪🇪 Естонія</option>
+        <option value="USA">🇺🇸 США</option>
+        <option value="Cyrpus">🇨🇾 Кіпр</option>
+        <option value="Switzerland">🇨🇭 Швейцарія</option>
+        <option value="Hong Kong">🇭🇰 Гонконг</option>
+        <option value="UK">🇬🇧 Велика Британія</option>
+        <option value="Poland">🇵🇱 Польща</option>
+        <option value="Spain">🇪🇸 Іспанія</option>
+        <option value="Czech Republic">🇨🇿 Чехія</option>
+        <option value="Portugal">🇵🇹 Португалія</option>
+        <option value="Romania">🇷🇴 Румунія</option>
+        <option value="Latvia">🇱🇻 Латвія</option>
+        <option value="Hungary">🇭🇺 Угорщина</option>
+        <option value="Lithuania">🇱🇹 Литва</option>
+        <option value="Slovakia">🇸🇰 Словаччина</option>
+        <option value="Germany">🇩🇪 Німеччина</option>
+        <option value="Ireland">🇮🇪 Ірландія</option>
+        <option value="UAE">🇦🇪 ОАЕ</option>
+        <option value="Singapore">🇸🇬 Сінгапур</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Країна реєстрації компанії</label>
+      <select id="companyRegCountry">
+        <option value="">— Оберіть —</option>
+        <option>Україна</option><option>Болгарія</option><option>Велика Британія</option>
+        <option>Гонконг</option><option>Естонія</option><option>Ірландія</option>
+        <option>Іспанія</option><option>Португалія</option><option>Словаччина</option>
+        <option>Латвія</option><option>Кіпр</option><option>Мальта</option>
+        <option>Німеччина</option><option>ОАЕ (UAE)</option><option>Польща</option>
+        <option>Румунія</option><option>США</option><option>Угорщина</option>
+        <option>Швейцарія</option><option>Чехія</option><option>Литва</option><option>Сінгапур</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Registration type -->
+  <div class="field-group">
+    <label>Тип запиту <span class="req">*</span></label>
+    <div class="option-grid">
+      <label class="option-card" id="opt-new" onclick="selectType('new')">
+        <input type="radio" name="reqType" value="new">
+        <div class="option-check"></div>
+        <span class="option-icon">🏗️</span>
+        <div class="option-title">Реєстрація нової компанії</div>
+        <div class="option-desc">Клієнт хоче зареєструвати нову юридичну особу</div>
+      </label>
+      <label class="option-card" id="opt-existing" onclick="selectType('existing')">
+        <input type="radio" name="reqType" value="existing">
+        <div class="option-check"></div>
+        <span class="option-icon">📂</span>
+        <div class="option-title">Обслуговування існуючої</div>
+        <div class="option-desc">Компанія вже існує — потрібні послуги</div>
+      </label>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(1)">← Назад</button>
+    <button class="btn btn-primary" onclick="goToStep(3)">Далі → Послуги</button>
+  </div>
+</div>
+
+<!-- STEP 3: Послуги -->
+<div class="card" id="step3">
+  <div class="card-title">Оберіть послуги</div>
+  <div class="card-subtitle">Оберіть одну або кілька послуг для цього клієнта</div>
+
+  <div id="selectedTags" class="selected-tags"></div>
+
+  <div class="services-container" id="servicesList">
+    <div class="service-item" style="justify-content:center; color: var(--text-muted); cursor:default;">
+      ← Спочатку оберіть юрисдикцію на кроці 2
+    </div>
+  </div>
+
+  <div class="field-group" style="margin-top:16px;">
+    <label>Інша послуга (якщо немає в списку)</label>
+    <input type="text" id="otherService" placeholder="Наприклад: Apostille для документів">
+    <div class="other-hint">Claude автоматично знайде відповідний шаблон або створить нову задачу з позначкою <span>⚡ нова послуга</span></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(2)">← Назад</button>
+    <button class="btn btn-primary" onclick="goToStep(4)">Далі → Підтвердження</button>
+  </div>
+</div>
+
+<!-- STEP 4: Підтвердження -->
+<div class="card" id="step4">
+  <div class="card-title">Підтвердження даних</div>
+  <div class="card-subtitle">Перевірте всі дані перед відправкою</div>
+
+  <div id="summaryContent"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep(3)">← Назад</button>
+    <button class="btn btn-primary" onclick="submitForm()" id="submitBtn">
+      ✦ Створити клієнта в ClickUp
+    </button>
+  </div>
+</div>
+
+<!-- Success screen -->
+<div class="success-card" id="successCard">
+  <span class="success-icon">✅</span>
+  <div class="success-title">Клієнта створено!</div>
+  <div class="success-sub">Claude успішно обробив дані і створив всі необхідні записи в ClickUp</div>
+  <div class="success-links" id="successLinks"></div>
+  <button class="btn btn-primary" onclick="resetForm()">+ Новий клієнт</button>
+</div>
+
+<!-- Processing overlay -->
+<div class="processing-overlay" id="processingOverlay">
+  <div class="processing-card">
+    <div class="spinner"></div>
+    <div class="processing-title">Claude обробляє дані...</div>
+    <div style="font-size:13px; color:var(--text-muted);">Перевірка дублів, створення записів, призначення послуг</div>
+    <div class="processing-log" id="processingLog"></div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// CONFIGURATION — вставте свої ключі
+// =============================================
+const CONFIG = {
+  WORKSPACE_ID: '90152314463',
+  LIST_FO: '901521194778',       // Фізичні особи
+  LIST_COMPANIES: '901520817116', // Компанії
+  PROXY: '/.netlify/functions/onboard',
+};
+
+// =============================================
+// JURISDICTIONS DATA
+// =============================================
+const JURISDICTIONS = {
+  "Ukraine": {
+    folderId: "901514746628",
+    registrationListId: "901521630328",
+    services: [
+      { name: "Послуги в Україні", id: "901521630326" },
+      { name: "(UA) Реєстрація ФОП", id: "901522302206" },
+      { name: "(UA) Ліквідація ФОП", id: "901522302207" },
+      { name: "(UA) Подача нульового звіту ФОП", id: "901522302208" },
+      { name: "(UA) Бухгалтерський супровід ФОП", id: "901522302209" },
+      { name: "(UA) Перереєстрація ФОП", id: "901522302211" },
+      { name: "(UA) Подача річного звіту ФОП", id: "901522302212" },
+      { name: "(UA) Реєстрація ТОВ", id: "901522302213" },
+      { name: "(UA) Bookkeeping іноземної компанії", id: "901522302633" },
+      { name: "(UA) Реєстрація в Дія Сіті", id: "901522302634" },
+    ]
+  },
+  "ESTONIA": {
+    folderId: "901514131372",
+    registrationListId: "901520832634",
+    services: [
+      { name: "Послуги в Естонії", id: "901521628386" },
+      { name: "(EE) Нульовий річний звіт", id: "901522300505" },
+      { name: "(EE) Реєстрація VAT offline", id: "901522300508" },
+      { name: "(EE) Ліквідація компанії", id: "901522300509" },
+      { name: "(EE) Сертифікат податкового резидентства", id: "901522300512" },
+      { name: "(EE) Перереєстрація компанії", id: "901522300513" },
+      { name: "(EE) Сабстенс", id: "901522300515" },
+      { name: "(EE) Юридична адреса на 1 рік", id: "901522300520" },
+      { name: "(EE) Реєстрація VAT online", id: "901522300522" },
+      { name: "(EE) Замовлення пакету документів", id: "901522300523" },
+      { name: "(EE) Річний звіт", id: "901522300524" },
+      { name: "(EE) Реєстрація компанії e-residency", id: "901522300529" },
+      { name: "(EE) Реєстрація компанії нотаріальна", id: "901522300530" },
+    ]
+  },
+  "USA": {
+    folderId: "901514131383",
+    registrationListId: "901521628742",
+    services: [
+      { name: "Послуги в USA", id: "901520832650" },
+      { name: "US Bookkeeping / Financial Statements", id: "901522001149" },
+      { name: "US Tax Return", id: "901522001152" },
+      { name: "Реєстрація компанії в Делавері", id: "901522302294" },
+      { name: "Annual report / Franchise Tax", id: "901522302295" },
+      { name: "Звіт BOI", id: "901522302299" },
+      { name: "Отримання ITIN в США", id: "901522302308" },
+      { name: "Нульова податкова декларація в США", id: "901522302312" },
+      { name: "Податкова декларація компанії в США", id: "901522302317" },
+      { name: "Ліквідація компанії в США", id: "901522302318" },
+      { name: "Податкова декларація фізособи в США", id: "901522302319" },
+      { name: "Реєстрація компанії в Техасі", id: "901522302321" },
+      { name: "Реєстрація компанії в Вайомінгу", id: "901522302635" },
+      { name: "Юридична адреса на 1 рік США", id: "901522302326" },
+    ]
+  },
+  "Cyrpus": {
+    folderId: "901514131391",
+    registrationListId: "901521628834",
+    services: [
+      { name: "Послуги на Кіпрі", id: "901520832659" },
+      { name: "Корпоративний сервіс (Annual Renewal)", id: "901522122531" },
+      { name: "Бухгалтерський облік (Accounting)", id: "901522122533" },
+      { name: "Аудит та закриття фінансового року", id: "901522122535" },
+      { name: "(CY) Реєстрація компанії", id: "901522302214" },
+      { name: "(CY) Ліквідація компанії", id: "901522302215" },
+      { name: "(CY) Реєстрація VAT", id: "901522302220" },
+      { name: "(CY) Аудит 1 рік", id: "901522302219" },
+      { name: "(CY) Пролонгація компанії на 1 рік", id: "901522302231" },
+      { name: "(CY) Перереєстрація компанії", id: "901522302226" },
+      { name: "(CY) Замовлення пакету документів", id: "901522302239" },
+      { name: "(CY) Бухгалтерія 1 рік", id: "901522302242" },
+    ]
+  },
+  "Switzerland": {
+    folderId: "901514131424",
+    registrationListId: "901521629501",
+    services: [
+      { name: "Послуги в Швейцарії", id: "901521629471" },
+      { name: "(CH) Юридична адреса на 1 рік", id: "901522302345" },
+      { name: "(CH) Банківський рахунок", id: "901522302348" },
+      { name: "(CH) Бухгалтерія за 1 рік", id: "901522302349" },
+      { name: "(CH) Перереєстрація компанії", id: "901522302350" },
+      { name: "(CH) Реєстрація ПДВ", id: "901522302352" },
+      { name: "(CH) Замовлення пакету документів", id: "901522304423" },
+    ]
+  },
+  "Hong Kong": {
+    folderId: "901514131450",
+    registrationListId: "901521629328",
+    services: [
+      { name: "Послуги в Гонконзі", id: "901521629232" },
+      { name: "Пролонгація компанії (Annual Renewal)", id: "901522122397" },
+      { name: "Бухгалтерський облік (Accounting)", id: "901522122398" },
+      { name: "Аудит та податкові подачі (Audit & PTR)", id: "901522122402" },
+      { name: "(HK) Реєстрація компанії", id: "901522302375" },
+      { name: "(HK) Ліквідація компанії", id: "901522302378" },
+      { name: "(HK) Перереєстрація компанії", id: "901522302374" },
+      { name: "(HK) Замовлення пакету документів з апостилем", id: "901522302379" },
+    ]
+  },
+  "UK": {
+    folderId: "901514360273",
+    registrationListId: "901521130950",
+    services: [
+      { name: "Послуги у Великій Британії", id: "901521628868" },
+      { name: "Пролонгація (Confirmation Statement)", id: "901522122653" },
+      { name: "Бухгалтерський облік (Accounting)", id: "901522122654" },
+      { name: "VAT — перевірка та звітність", id: "901522122655" },
+      { name: "(UK) Реєстрація компанії", id: "901522302250" },
+      { name: "(UK) Перереєстрація компанії", id: "901522302244" },
+      { name: "(UK) Реєстрація ПДВ", id: "901522302245" },
+      { name: "(UK) Ліквідація компанії", id: "901522302246" },
+      { name: "(UK) Річний звіт", id: "901522302249" },
+      { name: "(UK) Юридична адреса на 1 рік", id: "901522302255" },
+      { name: "(UK) Замовлення пакету документів", id: "901522302247" },
+    ]
+  },
+  "Poland": {
+    folderId: "901514744957",
+    registrationListId: "901521628239",
+    services: [
+      { name: "Послуги в Польщі", id: "901521628181" },
+      { name: "(PL) Реєстрація компанії", id: "901522302338" },
+      { name: "(PL) Реєстрація ІП", id: "901522302339" },
+      { name: "(PL) Ліквідація компанії", id: "901522302327" },
+      { name: "(PL) Перереєстрація компанії", id: "901522304430" },
+      { name: "(PL) Перереєстрація ІП", id: "901522302337" },
+      { name: "(PL) Сертифікат податкового резидентства", id: "901522302333" },
+      { name: "(PL) Отримання PESEL та Profil zaufane", id: "901522302335" },
+      { name: "(PL) Замовлення пакету документів", id: "901522302336" },
+    ]
+  },
+  "Spain": {
+    folderId: "901514745681",
+    registrationListId: "901521629192",
+    services: [
+      { name: "Послуги в Іспанії", id: "901521629133" },
+      { name: "(ES) Реєстрація компанії", id: "901522302381" },
+      { name: "(ES) Реєстрація ПДВ", id: "901522302382" },
+      { name: "(ES) Юридична адреса на 1 рік", id: "901522302383" },
+      { name: "(ES) Замовлення пакету документів", id: "901522302380" },
+    ]
+  },
+  "Czech Republic": {
+    folderId: "901514746039",
+    registrationListId: "901521629529",
+    services: [
+      { name: "Послуги в Чехії", id: "901521629530" },
+      { name: "(CZ) Реєстрація компанії", id: "901522302388" },
+      { name: "(CZ) Реєстрація ПДВ", id: "901522302384" },
+      { name: "(CZ) Перереєстрація компанії", id: "901522302386" },
+      { name: "(CZ) Оренда юридичної адреси на 1 рік", id: "901522302385" },
+      { name: "(CZ) Купівля готової компанії", id: "901522302389" },
+      { name: "(CZ) Замовлення пакету документів", id: "901522302390" },
+    ]
+  },
+  "Portugal": {
+    folderId: "901514746083",
+    registrationListId: "901521629591",
+    services: [
+      { name: "Послуги в Португалії", id: "901521629590" },
+      { name: "(PT) Реєстрація компанії", id: "901522302397" },
+      { name: "(PT) Реєстрація ПДВ", id: "901522302392" },
+      { name: "(PT) Оренда юридичної адреси на 1 рік", id: "901522302396" },
+      { name: "(PT) Замовлення пакету документів", id: "901522302395" },
+    ]
+  },
+  "Romania": {
+    folderId: "901514746124",
+    registrationListId: "901521629644",
+    services: [
+      { name: "Послуги в Румунії", id: "901521629645" },
+      { name: "(RO) Реєстрація компанії", id: "901522302458" },
+      { name: "(RO) Перереєстрація компанії", id: "901522302461" },
+      { name: "(RO) Реєстрація ПДВ", id: "901522302462" },
+      { name: "(RO) Юридична адреса на 1 рік", id: "901522302459" },
+      { name: "(RO) Замовлення пакету документів", id: "901522302464" },
+    ]
+  },
+  "Latvia": {
+    folderId: "901514746243",
+    registrationListId: "901521629810",
+    services: [
+      { name: "Послуги в Латвії", id: "901521629811" },
+      { name: "(LV) Реєстрація компанії", id: "901522302466" },
+      { name: "(LV) Перереєстрація компанії", id: "901522302470" },
+      { name: "(LV) Реєстрація ПДВ", id: "901522302468" },
+      { name: "(LV) Оренда юридичної адреси на 1 рік", id: "901522302471" },
+      { name: "(LV) Підключення системи бухгалтерії", id: "901522302467" },
+      { name: "(LV) Отримання ЕЦП", id: "901522302469" },
+    ]
+  },
+  "Hungary": {
+    folderId: "901514746294",
+    registrationListId: "901521629866",
+    services: [
+      { name: "Послуги в Угорщині", id: "901521629868" },
+      { name: "(HU) Реєстрація компанії", id: "901522302474" },
+      { name: "(HU) Перереєстрація компанії", id: "901522302473" },
+      { name: "(HU) Юридична адреса на 1 рік", id: "901522302475" },
+      { name: "(HU) Замовлення пакету документів", id: "901522302476" },
+    ]
+  },
+  "Lithuania": {
+    folderId: "901514746329",
+    registrationListId: "901521629912",
+    services: [
+      { name: "Послуги в Литві", id: "901521629913" },
+      { name: "(LT) Реєстрація компанії", id: "901522302543" },
+      { name: "(LT) Реєстрація малого товариства", id: "901522302536" },
+      { name: "(LT) Перереєстрація компанії", id: "901522302538" },
+      { name: "(LT) Реєстрація ПДВ компанії", id: "901522302484" },
+      { name: "(LT) Юридична адреса компанії на 1 рік", id: "901522302537" },
+      { name: "(LT) Відкриття рахунку в платіжній системі", id: "901522302533" },
+      { name: "(LT) Замовлення пакету документів", id: "901522304434" },
+    ]
+  },
+  "Slovakia": {
+    folderId: "901514746405",
+    registrationListId: "901521630024",
+    services: [
+      { name: "Послуги в Словаччині", id: "901521630025" },
+      { name: "(SK) Реєстрація компанії", id: "901522302548" },
+      { name: "(SK) Перереєстрація компанії", id: "901522302546" },
+      { name: "(SK) Реєстрація ПДВ", id: "901522302550" },
+      { name: "(SK) Юридична адреса на 1 рік", id: "901522302552" },
+      { name: "(SK) Замовлення пакету документів", id: "901522304436" },
+    ]
+  },
+  "Germany": {
+    folderId: "901514746464",
+    registrationListId: "901521630097",
+    services: [
+      { name: "Послуги в Німеччині", id: "901521630100" },
+      { name: "(DE) Реєстрація компанії", id: "901522302556" },
+      { name: "(DE) Перереєстрація компанії", id: "901522302559" },
+      { name: "(DE) Реєстрація ПДВ", id: "901522302554" },
+      { name: "(DE) Юридична адреса на 1 рік", id: "901522302560" },
+      { name: "(DE) Замовлення пакету документів", id: "901522302558" },
+    ]
+  },
+  "Ireland": {
+    folderId: "901514746499",
+    registrationListId: "901521630145",
+    services: [
+      { name: "Послуги в Ірландії", id: "901521630146" },
+      { name: "(IE) Реєстрація компанії", id: "901522302616" },
+      { name: "(IE) Перереєстрація компанії", id: "901522302617" },
+      { name: "(IE) Реєстрація ПДВ", id: "901522302561" },
+      { name: "(IE) Юридична адреса на 1 рік", id: "901522302562" },
+      { name: "(IE) Замовлення пакету документів", id: "901522302619" },
+    ]
+  },
+  "UAE": {
+    folderId: "901514746520",
+    registrationListId: "901521630181",
+    services: [
+      { name: "Послуги в ОАЕ", id: "901521630182" },
+      { name: "(AE) Реєстрація компанії", id: "901522302620" },
+      { name: "(AE) Перереєстрація компанії", id: "901522302622" },
+      { name: "(AE) Юридична адреса на 1 рік", id: "901522302623" },
+      { name: "(AE) Замовлення пакету документів", id: "901522302621" },
+    ]
+  },
+  "Singapore": {
+    folderId: "901514746545",
+    registrationListId: "901521630216",
+    services: [
+      { name: "Послуги в Сінгапурі", id: "901521630217" },
+      { name: "(SG) Реєстрація компанії", id: "901522302632" },
+      { name: "(SG) Перереєстрація компанії", id: "901522304414" },
+      { name: "(SG) Бухгалтерія", id: "901522302630" },
+      { name: "(SG) Юридична адреса на 1 рік", id: "901522302629" },
+      { name: "(SG) Юридичні послуги", id: "901522302631" },
+      { name: "(SG) Міграційні послуги", id: "901522302627" },
+      { name: "(SG) Замовлення пакету документів", id: "901522302625" },
+    ]
+  }
+};
+
+// =============================================
+// STATE
+// =============================================
+let currentStep = 1;
+let selectedServices = []; // [{name, listId}]
+let selectedType = null;
+
+// =============================================
+// NAVIGATION
+// =============================================
+function goToStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep = n;
+  document.getElementById(`step${n}`).classList.add('active');
+  updateStepIndicators();
+
+  if (n === 3) renderServicesList();
+  if (n === 4) renderSummary();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(n) {
+  if (n === 1) {
+    if (!document.getElementById('lastName').value.trim()) { alert('Вкажіть прізвище клієнта'); return false; }
+    if (!document.getElementById('firstName').value.trim()) { alert('Вкажіть ім\'я клієнта'); return false; }
+    if (!document.getElementById('hostAm').value) { alert('Оберіть Host AM'); return false; }
+  }
+  if (n === 2) {
+    if (!document.getElementById('companyName').value.trim()) { alert('Вкажіть назву компанії'); return false; }
+    if (!document.getElementById('jurisdiction').value) { alert('Оберіть юрисдикцію'); return false; }
+    if (!selectedType) { alert('Оберіть тип запиту'); return false; }
+  }
+  return true;
+}
+
+function updateStepIndicators() {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`step${i}-ind`);
+    el.className = 'step';
+    if (i < currentStep) el.classList.add('done');
+    else if (i === currentStep) el.classList.add('active');
+  }
+}
+
+// =============================================
+// TYPE SELECTION
+// =============================================
+function selectType(type) {
+  selectedType = type;
+  document.getElementById('opt-new').classList.toggle('selected', type === 'new');
+  document.getElementById('opt-existing').classList.toggle('selected', type === 'existing');
+}
+
+// =============================================
+// SERVICES
+// =============================================
+function loadServices() {
+  renderServicesList();
+}
+
+function renderServicesList() {
+  const jurisdiction = document.getElementById('jurisdiction').value;
+  const container = document.getElementById('servicesList');
+
+  if (!jurisdiction || !JURISDICTIONS[jurisdiction]) {
+    container.innerHTML = '<div class="service-item" style="justify-content:center;color:var(--text-muted);cursor:default;">← Спочатку оберіть юрисдикцію на кроці 2</div>';
+    return;
+  }
+
+  const services = JURISDICTIONS[jurisdiction].services;
+  container.innerHTML = services.map(s => {
+    const isChecked = selectedServices.some(sel => sel.listId === s.id);
+    return `<div class="service-item ${isChecked ? 'checked' : ''}" onclick="toggleService('${s.id}', '${s.name.replace(/'/g, "\\'")}')">
+      <div class="service-checkbox"></div>
+      <div class="service-name">${s.name}</div>
+    </div>`;
+  }).join('');
+
+  renderTags();
+}
+
+function toggleService(listId, name) {
+  const idx = selectedServices.findIndex(s => s.listId === listId);
+  if (idx >= 0) {
+    selectedServices.splice(idx, 1);
+  } else {
+    selectedServices.push({ listId, name });
+  }
+  renderServicesList();
+}
+
+function renderTags() {
+  const container = document.getElementById('selectedTags');
+  if (selectedServices.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = selectedServices.map((s, i) =>
+    `<div class="tag">${s.name}<span class="tag-remove" onclick="removeService(${i})">×</span></div>`
+  ).join('');
+}
+
+function removeService(i) {
+  selectedServices.splice(i, 1);
+  renderServicesList();
+}
+
+// =============================================
+// SUMMARY
+// =============================================
+function renderSummary() {
+  const jurisdiction = document.getElementById('jurisdiction').value;
+  const otherService = document.getElementById('otherService').value.trim();
+
+  const rows = [
+    ['👤 Клієнт', `${document.getElementById('lastName').value} ${document.getElementById('firstName').value} ${document.getElementById('middleName').value || ''}`.trim()],
+    ['📞 Телефон', document.getElementById('phone').value || '—'],
+    ['📧 Email', document.getElementById('email').value || '—'],
+    ['💬 Канал', `${document.getElementById('channel').value || '—'} ${document.getElementById('chatName').value || ''}`.trim()],
+    ['🌍 Громадянство', document.getElementById('citizenship').value || '—'],
+    ['🏦 Податкове резидентство', document.getElementById('taxResidency').value || '—'],
+    ['👔 Host AM', document.getElementById('hostAm').value || '—'],
+    ['🏢 Компанія', document.getElementById('companyName').value],
+    ['📍 Юрисдикція', jurisdiction || '—'],
+    ['📋 Тип запиту', selectedType === 'new' ? '🏗️ Реєстрація нової компанії' : '📂 Обслуговування існуючої'],
+    ['⚡ Послуги', selectedServices.length > 0 ? selectedServices.map(s => s.name).join(', ') : '—'],
+    ['✏️ Інша послуга', otherService || '—'],
+    ['📝 Нотатки', document.getElementById('notes').value || '—'],
+  ];
+
+  document.getElementById('summaryContent').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;">
+      ${rows.map(([k, v]) => `
+        <tr>
+          <td style="padding:10px 0;color:var(--text-muted);font-size:13px;width:200px;vertical-align:top;border-bottom:1px solid var(--border)">${k}</td>
+          <td style="padding:10px 0;font-size:14px;border-bottom:1px solid var(--border)">${v}</td>
+        </tr>
+      `).join('')}
+    </table>
+  `;
+}
+
+// =============================================
+// SUBMIT & CLAUDE PROCESSING
+// =============================================
+async function submitForm() {
+  const overlay = document.getElementById('processingOverlay');
+  overlay.classList.add('active');
+
+  const log = document.getElementById('processingLog');
+  const addLog = (msg, type = 'info') => {
+    log.innerHTML += `<div class="log-line ${type}">${msg}</div>`;
+    log.scrollTop = log.scrollHeight;
+  };
+
+  const jurisdiction = document.getElementById('jurisdiction').value;
+  const jData = JURISDICTIONS[jurisdiction];
+  const otherService = document.getElementById('otherService').value.trim();
+
+  const formData = {
+    person: {
+      lastName: document.getElementById('lastName').value,
+      firstName: document.getElementById('firstName').value,
+      middleName: document.getElementById('middleName').value,
+      phone: document.getElementById('phone').value,
+      email: document.getElementById('email').value,
+      channel: document.getElementById('channel').value,
+      chatName: document.getElementById('chatName').value,
+      citizenship: document.getElementById('citizenship').value,
+      taxResidency: document.getElementById('taxResidency').value,
+      hostAm: document.getElementById('hostAm').value,
+      notes: document.getElementById('notes').value,
+    },
+    company: {
+      name: document.getElementById('companyName').value,
+      jurisdiction: jurisdiction,
+      regCountry: document.getElementById('companyRegCountry').value,
+      type: selectedType,
+      registrationListId: jData?.registrationListId,
+    },
+    services: selectedServices,
+    otherService: otherService,
+  };
+
+  addLog('⏳ Підготовка даних...', 'info');
+
+  try {
+    // Build Claude prompt
+    const prompt = buildClaudePrompt(formData);
+    addLog('🤖 Відправка до Claude...', 'info');
+
+    const claudeResp = await fetch(CONFIG.PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'claude',
+        system: `Ти асистент для CRM системи Finevolution. Твоя задача — проаналізувати дані онбордингу нового клієнта і повернути JSON з планом дій для ClickUp.
+        
+Повертай ТІЛЬКИ валідний JSON без жодних пояснень, у такому форматі:
+{
+  "taskName": "Назва задачі для ФО",
+  "duplicateCheck": "Як перевірити дублікат — ключові слова для пошуку",
+  "companyTaskName": "Назва для запису компанії",
+  "registrationRequired": true/false,
+  "otherServiceMatch": "якщо є otherService — назва схожої послуги зі списку або null",
+  "otherServiceIsNew": true/false,
+  "summary": "Короткий опис що буде створено (2-3 речення)"
+}`,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const claudeData = await claudeResp.json();
+    const claudeText = claudeData.content?.[0]?.text || '{}';
+
+    let plan;
+    try {
+      plan = JSON.parse(claudeText.replace(/```json|```/g, '').trim());
+    } catch(e) {
+      plan = { taskName: `${formData.person.lastName} ${formData.person.firstName}`, summary: 'Обробка Claude' };
+    }
+
+    addLog(`✓ Claude: ${plan.summary || 'план готовий'}`, 'ok');
+
+    // Create tasks via ClickUp API
+    const createdLinks = [];
+
+    // 1. Create FO task
+    addLog('📝 Створення запису фізособи...', 'info');
+    const foTask = await createClickUpTask(
+      CONFIG.LIST_FO,
+      plan.taskName || `${formData.person.lastName} ${formData.person.firstName}`,
+      buildFODescription(formData)
+    );
+    if (foTask?.id) {
+      createdLinks.push({ label: '👤 Фізична особа', url: foTask.url });
+      addLog(`✓ ФО створено: ${foTask.url}`, 'ok');
+    }
+
+    // 2. Registration task if needed
+    if (selectedType === 'new' && formData.company.registrationListId) {
+      addLog('🏗️ Створення задачі реєстрації компанії...', 'info');
+      const regTask = await createClickUpTask(
+        formData.company.registrationListId,
+        `Реєстрація: ${formData.company.name}`,
+        `Клієнт: ${formData.person.lastName} ${formData.person.firstName}\nМенеджер: ${formData.person.hostAm}`
+      );
+      if (regTask?.id) {
+        createdLinks.push({ label: '🏗️ Реєстрація компанії', url: regTask.url });
+        addLog(`✓ Задача реєстрації створена`, 'ok');
+      }
+    }
+
+    // 3. Service tasks
+    for (const service of formData.services) {
+      addLog(`📋 Створення задачі: ${service.name}...`, 'info');
+      const sTask = await createClickUpTask(
+        service.listId,
+        `${formData.company.name} — ${service.name}`,
+        `Клієнт: ${formData.person.lastName} ${formData.person.firstName}\nМенеджер: ${formData.person.hostAm}`
+      );
+      if (sTask?.id) {
+        createdLinks.push({ label: `📋 ${service.name}`, url: sTask.url });
+        addLog(`✓ ${service.name}`, 'ok');
+      }
+    }
+
+    // 4. Other service
+    if (otherService) {
+      const listId = plan.otherServiceMatch && !plan.otherServiceIsNew
+        ? (formData.services.find(s => s.name.includes(plan.otherServiceMatch))?.listId || CONFIG.LIST_COMPANIES)
+        : CONFIG.LIST_COMPANIES;
+
+      addLog(`⚡ ${plan.otherServiceIsNew ? 'Нова послуга' : 'Послуга'}: ${otherService}...`, 'info');
+      const otherTask = await createClickUpTask(
+        listId,
+        `${plan.otherServiceIsNew ? '⚡ НОВА ПОСЛУГА: ' : ''}${formData.company.name} — ${otherService}`,
+        `Клієнт: ${formData.person.lastName} ${formData.person.firstName}\n${plan.otherServiceIsNew ? '⚠️ Ця послуга не знайдена в стандартному переліку — потребує уточнення шаблону' : ''}`
+      );
+      if (otherTask?.id) {
+        createdLinks.push({ label: `⚡ ${otherService}`, url: otherTask.url });
+        addLog(`✓ Задача для ${otherService} створена`, 'ok');
+      }
+    }
+
+    addLog('✅ Всі задачі створено!', 'ok');
+    overlay.classList.remove('active');
+    showSuccess(createdLinks);
+
+  } catch (err) {
+    addLog(`❌ Помилка: ${err.message}`, 'err');
+    console.error(err);
+  }
+}
+
+function buildClaudePrompt(data) {
+  return `Новий клієнт онбординг:
+ПІБ: ${data.person.lastName} ${data.person.firstName} ${data.person.middleName || ''}
+Компанія: ${data.company.name}
+Юрисдикція: ${data.company.jurisdiction}
+Тип: ${data.company.type === 'new' ? 'Реєстрація нової компанії' : 'Обслуговування існуючої'}
+Послуги: ${data.services.map(s => s.name).join(', ') || 'не обрано'}
+Інша послуга: ${data.otherService || 'немає'}
+Нотатки: ${data.person.notes || 'немає'}
+
+Поверни JSON з планом дій.`;
+}
+
+function buildFODescription(data) {
+  return `📞 ${data.person.phone || '—'}
+📧 ${data.person.email || '—'}
+💬 ${data.person.channel || ''} ${data.person.chatName || ''}
+🌍 Громадянство: ${data.person.citizenship || '—'}
+🏦 Податкове резидентство: ${data.person.taxResidency || '—'}
+🏢 Компанія: ${data.company.name} (${data.company.jurisdiction})
+📝 ${data.person.notes || ''}`;
+}
+
+async function createClickUpTask(listId, name, description) {
+  const resp = await fetch(CONFIG.PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'clickup_create_task', listId, name, description }),
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Proxy error ${resp.status}: ${err}`);
+  }
+  return await resp.json();
+}
+
+// =============================================
+// SUCCESS
+// =============================================
+function showSuccess(links) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('successCard').classList.add('active');
+
+  document.getElementById('successLinks').innerHTML = links.map(l =>
+    `<a href="${l.url}" target="_blank" class="success-link">↗ ${l.label}</a>`
+  ).join('');
+}
+
+function resetForm() {
+  document.getElementById('successCard').classList.remove('active');
+  currentStep = 1;
+  selectedServices = [];
+  selectedType = null;
+  document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.value = '');
+  document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById('step1').classList.add('active');
+  updateStepIndicators();
+}
+</script>
+</body>
+</html>
