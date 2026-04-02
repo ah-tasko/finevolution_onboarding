@@ -131,7 +131,7 @@ exports.handler = async function(event) {
       // з списку «Послуги клієнтам/[Юрисдикція]»
       let fieldMap = {}; // subcategory_id → field_id
       if (servicesListId) {
-        const fieldsResp = await cuGet(`/list/${servicesListId}/field`);
+        const fieldsResp = await cuGet(`/list/${servicesListId}/fields`);
         const fields = fieldsResp.fields || [];
         for (const f of fields) {
           if (f.type === 'list_relationship' && f.type_config?.subcategory_id) {
@@ -198,8 +198,10 @@ exports.handler = async function(event) {
       };
 
     } catch(err) {
+      console.error('Onboard error:', err.message, err.stack);
       return {
         statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: err.message, created: results.created }),
       };
     }
