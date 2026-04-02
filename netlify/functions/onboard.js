@@ -13,7 +13,6 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
-  // ── Helpers ──────────────────────────────────────────
   async function cuPost(path, data) {
     const r = await fetch(`https://api.clickup.com/api/v2${path}`, {
       method: 'POST',
@@ -30,7 +29,7 @@ exports.handler = async function(event) {
     return r.json();
   }
 
-  // ── «Послуги клієнтам» — жорстка прив'язка list_id ──
+  // ── Послуги клієнтам — жорстка прив'язка list_id ──
   const SERVICES_LISTS = {
     'ESTONIA':        '901522300107',
     'USA':            '901522318620',
@@ -54,38 +53,84 @@ exports.handler = async function(event) {
     'Ireland':        '901522378546',
   };
 
-  // ── ПОВНИЙ ОНБОРДИНГ ─────────────────────────────────
+  // ── Host AM → user ID ──
+  const HOST_AM_IDS = {
+    'Anzhela Kameneva': 106604124,
+    'Olena Kucheriuk':  106604125,
+    'Nataliia Haikalova': 236532973,
+    'Olesia Padalka':   null,
+  };
+
+  // ── Dropdown orderindex maps ──
+  const CITIZENSHIP_MAP = {
+    'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
+    'Ірландія':5,'Іспанія':6,'Італія':7,'Індонезія':8,'Канада':9,'Кіпр':10,
+    'Мальта':11,'Німеччина':12,'ОАЕ (UAE)':13,'Польща':14,'Румунія':15,
+    'США':16,'Угорщина':17,'Франція':18,'Чехія':19,'Швейцарія':20,'Литва':21,
+  };
+  const TAX_RESIDENCY_MAP = {
+    'Україна':0,'Кіпр':1,'Естонія':2,'Польща':3,'Велика Британія':4,'США':5,
+    'ОАЕ':6,'Нідерланди':7,'Німеччина':8,'Австрія':9,'Швейцарія':10,'Мальта':11,
+    'Люксембург':12,'Ірландія':13,'Інше':14,
+  };
+  const CHANNEL_MAP = { 'Signal':0, 'Telegram':1, 'WhatsApp':2 };
+  const REG_COUNTRY_MAP = {
+    'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
+    'Ірландія':5,'Іспанія':6,'Португалія':8,'Словаччина':9,'Латвія':10,
+    'Кіпр':10,'Мальта':11,'Німеччина':12,'ОАЕ (UAE)':13,'Польща':14,
+    'Румунія':15,'США':16,'Угорщина':17,'Швейцарія':20,'Чехія':19,
+    'Литва':21,'Сінгапур':25,
+  };
+
   if (body.action === 'onboard') {
-    const { person, company, services, otherService } = body;
+    const { person, company, services, otherService, founders } = body;
     const results = { created: [], errors: [] };
 
     try {
-      // 1. Побудувати ім'я ФО
       const foName = [person.lastName, person.firstName, person.middleName]
         .filter(Boolean).join(' ');
 
-      const foDesc = [
-        person.phone       ? `📞 ${person.phone}` : '',
-        person.email       ? `📧 ${person.email}` : '',
-        person.channel     ? `💬 ${person.channel}${person.chatName ? ' — ' + person.chatName : ''}` : '',
-        person.citizenship ? `🌍 Громадянство: ${person.citizenship}` : '',
-        person.taxResidency? `🏦 Податкове резидентство: ${person.taxResidency}` : '',
-        company.name       ? `🏢 Компанія: ${company.name} (${company.jurisdiction})` : '',
-        person.notes       ? `📝 ${person.notes}` : '',
-      ].filter(Boolean).join('\n');
+      // ── Кастомні поля для ФО ──
+      const foCustomFields = [];
 
-      // 2. Створити ФО в «Фізичні особи»
+      if (person.phone)
+        foCustomFields.push({ id: '4450f80a-854f-48b5-84b4-145e324474a1', value: person.phone });
+
+      if (person.email)
+        foCustomFields.push({ id: '919eef7e-f220-4d9a-87f7-d104df8e63ea', value: person.email });
+
+      if (person.channel && CHANNEL_MAP[person.channel] !== undefined)
+        foCustomFields.push({ id: '51cc21fe-e3ff-4daa-885d-bdb5305456b9', value: CHANNEL_MAP[person.channel] });
+
+      if (person.chatName)
+        foCustomFields.push({ id: '669ba179-3fad-45c3-9c83-9a557f46a7ea', value: person.chatName });
+
+      if (person.citizenship && CITIZENSHIP_MAP[person.citizenship] !== undefined)
+        foCustomFields.push({ id: '092a8da6-3b4e-47ef-97a6-902eb10bc5b8', value: CITIZENSHIP_MAP[person.citizenship] });
+
+      if (person.taxResidency && TAX_RESIDENCY_MAP[person.taxResidency] !== undefined)
+        foCustomFields.push({ id: 'e1c1ccc2-ab7a-42e7-b305-1cf08a036a59', value: TAX_RESIDENCY_MAP[person.taxResidency] });
+
+      const hostAmId = HOST_AM_IDS[person.hostAm];
+      if (hostAmId)
+        foCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: hostAmId });
+
+      // Client Onboarding Date = сьогодні
+      foCustomFields.push({ id: 'fe92b020-8b72-4c96-8216-bff0758791f3', value: Date.now() });
+
+      if (person.notes)
+        foCustomFields.push({ id: '3dd54127-2750-4ef4-ae8d-ac61cfc0243c', value: person.notes });
+
+      // 1. Створити ФО
       const foTask = await cuPost('/list/901521194778/task', {
         name: foName,
-        description: foDesc,
+        custom_fields: foCustomFields,
       });
       if (!foTask.id) throw new Error(`ФО не створено: ${JSON.stringify(foTask)}`);
       results.created.push({ label: `👤 ${foName}`, url: foTask.url });
 
-      // 3. Перевірити дублі компанії в «Компанії»
+      // 2. Перевірити дублі компанії
       let companyTaskId = null;
-      let companyTaskUrl = null;
-
       const searchResp = await cuGet(
         `/team/90152314463/task?list_id[]=901520817116&search=${encodeURIComponent(company.name)}&page=0`
       );
@@ -95,28 +140,64 @@ exports.handler = async function(event) {
 
       if (existing) {
         companyTaskId = existing.id;
-        companyTaskUrl = existing.url;
         results.created.push({ label: `🏢 Компанія (існуюча): ${company.name}`, url: existing.url });
       } else {
-        // Створити нову компанію в «Компанії» (MASTER DATABASE)
-        const compDesc = [
-          `🌍 Юрисдикція: ${company.jurisdiction}`,
-          company.regCountry ? `📍 Країна реєстрації: ${company.regCountry}` : '',
-          `👤 Засновник: ${foName}`,
-          `👔 Host AM: ${person.hostAm}`,
-        ].filter(Boolean).join('\n');
+        // ── Кастомні поля для Компанії ──
+        const compCustomFields = [];
+
+        if (company.regCountry && REG_COUNTRY_MAP[company.regCountry] !== undefined)
+          compCustomFields.push({ id: '5eefba69-8e39-4b99-9097-937140c7fc92', value: REG_COUNTRY_MAP[company.regCountry] });
+
+        if (hostAmId)
+          compCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: hostAmId });
+
+        if (person.channel && CHANNEL_MAP[person.channel] !== undefined)
+          compCustomFields.push({ id: '51cc21fe-e3ff-4daa-885d-bdb5305456b9', value: CHANNEL_MAP[person.channel] });
+
+        if (person.chatName)
+          compCustomFields.push({ id: '669ba179-3fad-45c3-9c83-9a557f46a7ea', value: person.chatName });
+
+        // В послугах = Новий (orderindex 1)
+        compCustomFields.push({ id: 'b9d0306f-1a0d-4e80-9faf-6cff2e7e73d7', value: 1 });
+
+        // Засновники (до 5)
+        const founderFields = [
+          'd5c651c0-d603-44f1-8ab1-73b7b641710d',
+          '3f84861a-55d0-4190-8f75-9badc24fe0a5',
+          '8c8db650-c594-4be9-ae83-1db534aa9e74',
+          '7be35d79-270c-47a9-90d4-e11eef8b65b6',
+          '74d51780-7746-4e01-bc57-670f6943c4ea',
+        ];
+        const shareFields = [
+          'ed53f2c2-cad9-4ae0-ac16-c75a013e8829',
+          '3d858a57-9def-4d88-bc7b-53960c722aca',
+          '662cfe04-8e63-49f5-8053-2ab60aac9cbb',
+          '489e3a92-c65f-4a66-bf58-722866d92b45',
+          'e06d411c-8ad5-4870-b56f-4b63143134a1',
+        ];
+
+        (founders || []).forEach((f, i) => {
+          if (i >= 5) return;
+          if (f.name) compCustomFields.push({ id: founderFields[i], value: f.name });
+          if (f.share) compCustomFields.push({ id: shareFields[i], value: parseFloat(f.share) });
+        });
+
+        // Кількість засновників
+        if (founders && founders.length > 0) {
+          const countIdx = Math.min(founders.length - 1, 2); // 1=0, 2=1, 3=2
+          compCustomFields.push({ id: '316a1806-d5ec-43e8-8f0c-44d9508ddce6', value: countIdx });
+        }
 
         const compTask = await cuPost('/list/901520817116/task', {
           name: company.name,
-          description: compDesc,
+          custom_fields: compCustomFields,
         });
         if (!compTask.id) throw new Error(`Компанія не створена: ${JSON.stringify(compTask)}`);
         companyTaskId = compTask.id;
-        companyTaskUrl = compTask.url;
         results.created.push({ label: `🏢 Компанія: ${company.name}`, url: compTask.url });
       }
 
-      // 4. Зв'язати ФО ↔ Компанія (обидва боки)
+      // 3. Зв'язати ФО ↔ Компанія
       await cuPost(`/task/${foTask.id}/field/c52dabd5-ab4d-435a-a619-bc5dbc3fbc59`, {
         value: { add: [companyTaskId] }
       });
@@ -124,29 +205,24 @@ exports.handler = async function(event) {
         value: { add: [foTask.id] }
       });
 
-      // 5. Отримати services_list_id для юрисдикції
+      // 4. Отримати services_list_id + динамічну field map
       const servicesListId = SERVICES_LISTS[company.jurisdiction];
-
-      // 6. Динамічно отримати field map: subcategory_id → field_id
-      // з списку «Послуги клієнтам/[Юрисдикція]»
-      let fieldMap = {}; // subcategory_id → field_id
+      let fieldMap = {};
       if (servicesListId) {
         const fieldsResp = await cuGet(`/list/${servicesListId}/fields`);
-        const fields = fieldsResp.fields || [];
-        for (const f of fields) {
+        for (const f of (fieldsResp.fields || [])) {
           if (f.type === 'list_relationship' && f.type_config?.subcategory_id) {
             fieldMap[f.type_config.subcategory_id] = f.id;
           }
         }
       }
 
-      // 7. Створити задачу компанії в «Послуги клієнтам/[Юрисдикція]»
-      //    (це буде "профіль" компанії в контексті послуг)
+      // 5. Створити задачу компанії в «Послуги клієнтам/[Юрисдикція]»
       let serviceCompanyTaskId = null;
       if (servicesListId) {
         const scTask = await cuPost(`/list/${servicesListId}/task`, {
           name: company.name,
-          description: `👤 ${foName}\n👔 ${person.hostAm}\n🌍 ${company.jurisdiction}`,
+          description: `👤 ${foName}\n👔 ${person.hostAm}`,
         });
         if (scTask.id) {
           serviceCompanyTaskId = scTask.id;
@@ -154,19 +230,14 @@ exports.handler = async function(event) {
         }
       }
 
-      // 8. По кожній послузі → створити задачу в JURISDICTIONS + прив'язати
+      // 6. По кожній послузі → створити задачу в JURISDICTIONS + прив'язати
       for (const service of (services || [])) {
-        // Задача послуги іде в список з JURISDICTIONS (service.listId)
         const sTask = await cuPost(`/list/${service.listId}/task`, {
           name: `${company.name} — ${service.name}`,
-          description: `👤 Клієнт: ${foName}\n👔 Менеджер: ${person.hostAm}`,
+          description: `👤 ${foName}\n👔 ${person.hostAm}`,
         });
-
         if (sTask.id) {
           results.created.push({ label: `📋 ${service.name}`, url: sTask.url });
-
-          // Прив'язати задачу послуги → задача компанії в «Послуги клієнтам»
-          // через динамічно знайдений field_id
           if (serviceCompanyTaskId) {
             const fieldId = fieldMap[service.listId];
             if (fieldId) {
@@ -176,15 +247,15 @@ exports.handler = async function(event) {
             }
           }
         } else {
-          results.errors.push(`Послуга ${service.name}: ${JSON.stringify(sTask)}`);
+          results.errors.push(`${service.name}: ${JSON.stringify(sTask)}`);
         }
       }
 
-      // 9. Інша послуга
+      // 7. Інша послуга
       if (otherService && servicesListId) {
         const otherTask = await cuPost(`/list/${servicesListId}/task`, {
           name: `⚡ НОВА: ${company.name} — ${otherService}`,
-          description: `👤 Клієнт: ${foName}\n👔 Менеджер: ${person.hostAm}\n⚠️ Потребує уточнення шаблону`,
+          description: `👤 ${foName}\n👔 ${person.hostAm}\n⚠️ Потребує уточнення шаблону`,
         });
         if (otherTask.id) {
           results.created.push({ label: `⚡ ${otherService}`, url: otherTask.url });
@@ -198,7 +269,7 @@ exports.handler = async function(event) {
       };
 
     } catch(err) {
-      console.error('Onboard error:', err.message, err.stack);
+      console.error('Onboard error:', err.message);
       return {
         statusCode: 500,
         headers: { 'Content-Type': 'application/json' },
