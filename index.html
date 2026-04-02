@@ -1260,151 +1260,41 @@ async function submitForm() {
     otherService: otherService,
   };
 
-  addLog('⏳ Підготовка даних...', 'info');
+  addLog('⏳ Відправка даних...', 'info');
 
   try {
-    // Build Claude prompt
-    const prompt = buildClaudePrompt(formData);
-    addLog('🤖 Відправка до Claude...', 'info');
+    addLog('🔄 Створення ФО, Компанії та послуг...', 'info');
 
-    const claudeResp = await fetch(CONFIG.PROXY, {
+    const resp = await fetch(CONFIG.PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action: 'claude',
-        system: `Ти асистент для CRM системи Finevolution. Твоя задача — проаналізувати дані онбордингу нового клієнта і повернути JSON з планом дій для ClickUp.
-        
-Повертай ТІЛЬКИ валідний JSON без жодних пояснень, у такому форматі:
-{
-  "taskName": "Назва задачі для ФО",
-  "duplicateCheck": "Як перевірити дублікат — ключові слова для пошуку",
-  "companyTaskName": "Назва для запису компанії",
-  "registrationRequired": true/false,
-  "otherServiceMatch": "якщо є otherService — назва схожої послуги зі списку або null",
-  "otherServiceIsNew": true/false,
-  "summary": "Короткий опис що буде створено (2-3 речення)"
-}`,
-        messages: [{ role: 'user', content: prompt }]
+        action: 'onboard',
+        person: formData.person,
+        company: formData.company,
+        services: formData.services,
+        otherService: formData.otherService,
       })
     });
 
-    const claudeData = await claudeResp.json();
-    const claudeText = claudeData.content?.[0]?.text || '{}';
+    const result = await resp.json();
 
-    let plan;
-    try {
-      plan = JSON.parse(claudeText.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      plan = { taskName: `${formData.person.lastName} ${formData.person.firstName}`, summary: 'Обробка Claude' };
+    if (result.errors && result.errors.length > 0) {
+      result.errors.forEach(e => addLog(`⚠️ ${e}`, 'err'));
     }
 
-    addLog(`✓ Claude: ${plan.summary || 'план готовий'}`, 'ok');
-
-    // Create tasks via ClickUp API
-    const createdLinks = [];
-
-    // 1. Create FO task
-    addLog('📝 Створення запису фізособи...', 'info');
-    const foTask = await createClickUpTask(
-      CONFIG.LIST_FO,
-      plan.taskName || `${formData.person.lastName} ${formData.person.firstName}`,
-      buildFODescription(formData)
-    );
-    if (foTask?.id) {
-      createdLinks.push({ label: '👤 Фізична особа', url: foTask.url });
-      addLog(`✓ ФО створено: ${foTask.url}`, 'ok');
+    if (result.created && result.created.length > 0) {
+      result.created.forEach(c => addLog(`✓ ${c.label}`, 'ok'));
     }
 
-    // 2. Registration task if needed
-    if (selectedType === 'new' && formData.company.registrationListId) {
-      addLog('🏗️ Створення задачі реєстрації компанії...', 'info');
-      const regTask = await createClickUpTask(
-        formData.company.registrationListId,
-        `Реєстрація: ${formData.company.name}`,
-        `Клієнт: ${formData.person.lastName} ${formData.person.firstName}\nМенеджер: ${formData.person.hostAm}`
-      );
-      if (regTask?.id) {
-        createdLinks.push({ label: '🏗️ Реєстрація компанії', url: regTask.url });
-        addLog(`✓ Задача реєстрації створена`, 'ok');
-      }
-    }
-
-    // 3. Service tasks
-    for (const service of formData.services) {
-      addLog(`📋 Створення задачі: ${service.name}...`, 'info');
-      const sTask = await createClickUpTask(
-        service.listId,
-        `${formData.company.name} — ${service.name}`,
-        `Клієнт: ${formData.person.lastName} ${formData.person.firstName}\nМенеджер: ${formData.person.hostAm}`
-      );
-      if (sTask?.id) {
-        createdLinks.push({ label: `📋 ${service.name}`, url: sTask.url });
-        addLog(`✓ ${service.name}`, 'ok');
-      }
-    }
-
-    // 4. Other service
-    if (otherService) {
-      const listId = plan.otherServiceMatch && !plan.otherServiceIsNew
-        ? (formData.services.find(s => s.name.includes(plan.otherServiceMatch))?.listId || CONFIG.LIST_COMPANIES)
-        : CONFIG.LIST_COMPANIES;
-
-      addLog(`⚡ ${plan.otherServiceIsNew ? 'Нова послуга' : 'Послуга'}: ${otherService}...`, 'info');
-      const otherTask = await createClickUpTask(
-        listId,
-        `${plan.otherServiceIsNew ? '⚡ НОВА ПОСЛУГА: ' : ''}${formData.company.name} — ${otherService}`,
-        `Клієнт: ${formData.person.lastName} ${formData.person.firstName}\n${plan.otherServiceIsNew ? '⚠️ Ця послуга не знайдена в стандартному переліку — потребує уточнення шаблону' : ''}`
-      );
-      if (otherTask?.id) {
-        createdLinks.push({ label: `⚡ ${otherService}`, url: otherTask.url });
-        addLog(`✓ Задача для ${otherService} створена`, 'ok');
-      }
-    }
-
-    addLog('✅ Всі задачі створено!', 'ok');
+    addLog('✅ Готово!', 'ok');
     overlay.classList.remove('active');
-    showSuccess(createdLinks);
+    showSuccess(result.created || []);
 
   } catch (err) {
     addLog(`❌ Помилка: ${err.message}`, 'err');
     console.error(err);
   }
-}
-
-function buildClaudePrompt(data) {
-  return `Новий клієнт онбординг:
-ПІБ: ${data.person.lastName} ${data.person.firstName} ${data.person.middleName || ''}
-Компанія: ${data.company.name}
-Юрисдикція: ${data.company.jurisdiction}
-Тип: ${data.company.type === 'new' ? 'Реєстрація нової компанії' : 'Обслуговування існуючої'}
-Послуги: ${data.services.map(s => s.name).join(', ') || 'не обрано'}
-Інша послуга: ${data.otherService || 'немає'}
-Нотатки: ${data.person.notes || 'немає'}
-
-Поверни JSON з планом дій.`;
-}
-
-function buildFODescription(data) {
-  return `📞 ${data.person.phone || '—'}
-📧 ${data.person.email || '—'}
-💬 ${data.person.channel || ''} ${data.person.chatName || ''}
-🌍 Громадянство: ${data.person.citizenship || '—'}
-🏦 Податкове резидентство: ${data.person.taxResidency || '—'}
-🏢 Компанія: ${data.company.name} (${data.company.jurisdiction})
-📝 ${data.person.notes || ''}`;
-}
-
-async function createClickUpTask(listId, name, description) {
-  const resp = await fetch(CONFIG.PROXY, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'clickup_create_task', listId, name, description }),
-  });
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(`Proxy error ${resp.status}: ${err}`);
-  }
-  return await resp.json();
 }
 
 // =============================================
