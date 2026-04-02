@@ -3,7 +3,6 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
   const CLICKUP_TOKEN = process.env.CLICKUP_TOKEN;
 
   let body;
@@ -29,7 +28,6 @@ exports.handler = async function(event) {
     return r.json();
   }
 
-  // ── Послуги клієнтам — жорстка прив'язка list_id ──
   const SERVICES_LISTS = {
     'ESTONIA':        '901522300107',
     'USA':            '901522318620',
@@ -53,15 +51,12 @@ exports.handler = async function(event) {
     'Ireland':        '901522378546',
   };
 
-  // ── Host AM → user ID ──
   const HOST_AM_IDS = {
-    'Anzhela Kameneva': 106604124,
-    'Olena Kucheriuk':  106604125,
+    'Anzhela Kameneva':   106604124,
+    'Olena Kucheriuk':    106604125,
     'Nataliia Haikalova': 236532973,
-    'Olesia Padalka':   null,
   };
 
-  // ── Dropdown orderindex maps ──
   const CITIZENSHIP_MAP = {
     'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
     'Ірландія':5,'Іспанія':6,'Італія':7,'Індонезія':8,'Канада':9,'Кіпр':10,
@@ -76,10 +71,10 @@ exports.handler = async function(event) {
   const CHANNEL_MAP = { 'Signal':0, 'Telegram':1, 'WhatsApp':2 };
   const REG_COUNTRY_MAP = {
     'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
-    'Ірландія':5,'Іспанія':6,'Португалія':8,'Словаччина':9,'Латвія':10,
-    'Кіпр':10,'Мальта':11,'Німеччина':12,'ОАЕ (UAE)':13,'Польща':14,
-    'Румунія':15,'США':16,'Угорщина':17,'Швейцарія':20,'Чехія':19,
-    'Литва':21,'Сінгапур':25,
+    'Ірландія':5,'Іспанія':6,'Італія':7,'Індонезія':8,'Канада':9,'Кіпр':10,
+    'Мальта':11,'Німеччина':12,'ОАЕ (UAE)':13,'Польща':14,'Румунія':15,
+    'США':16,'Угорщина':17,'Франція':18,'Чехія':19,'Швейцарія':20,
+    'Литва':21,'Португалія':22,'Словаччина':23,'Латвія':24,'Сінгапур':25,
   };
 
   if (body.action === 'onboard') {
@@ -90,34 +85,26 @@ exports.handler = async function(event) {
       const foName = [person.lastName, person.firstName, person.middleName]
         .filter(Boolean).join(' ');
 
-      // ── Кастомні поля для ФО ──
+      const hostAmId = HOST_AM_IDS[person.hostAm] || null;
+
+      // ── Кастомні поля ФО ──
       const foCustomFields = [];
 
       if (person.phone)
         foCustomFields.push({ id: '4450f80a-854f-48b5-84b4-145e324474a1', value: person.phone });
-
       if (person.email)
         foCustomFields.push({ id: '919eef7e-f220-4d9a-87f7-d104df8e63ea', value: person.email });
-
       if (person.channel && CHANNEL_MAP[person.channel] !== undefined)
         foCustomFields.push({ id: '51cc21fe-e3ff-4daa-885d-bdb5305456b9', value: CHANNEL_MAP[person.channel] });
-
       if (person.chatName)
         foCustomFields.push({ id: '669ba179-3fad-45c3-9c83-9a557f46a7ea', value: person.chatName });
-
       if (person.citizenship && CITIZENSHIP_MAP[person.citizenship] !== undefined)
         foCustomFields.push({ id: '092a8da6-3b4e-47ef-97a6-902eb10bc5b8', value: CITIZENSHIP_MAP[person.citizenship] });
-
       if (person.taxResidency && TAX_RESIDENCY_MAP[person.taxResidency] !== undefined)
         foCustomFields.push({ id: 'e1c1ccc2-ab7a-42e7-b305-1cf08a036a59', value: TAX_RESIDENCY_MAP[person.taxResidency] });
-
-      const hostAmId = HOST_AM_IDS[person.hostAm];
       if (hostAmId)
-        foCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: hostAmId });
-
-      // Client Onboarding Date = сьогодні
+        foCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: [{ id: hostAmId }] });
       foCustomFields.push({ id: 'fe92b020-8b72-4c96-8216-bff0758791f3', value: Date.now() });
-
       if (person.notes)
         foCustomFields.push({ id: '3dd54127-2750-4ef4-ae8d-ac61cfc0243c', value: person.notes });
 
@@ -142,50 +129,41 @@ exports.handler = async function(event) {
         companyTaskId = existing.id;
         results.created.push({ label: `🏢 Компанія (існуюча): ${company.name}`, url: existing.url });
       } else {
-        // ── Кастомні поля для Компанії ──
+        // ── Кастомні поля Компанії ──
         const compCustomFields = [];
 
         if (company.regCountry && REG_COUNTRY_MAP[company.regCountry] !== undefined)
           compCustomFields.push({ id: '5eefba69-8e39-4b99-9097-937140c7fc92', value: REG_COUNTRY_MAP[company.regCountry] });
-
         if (hostAmId)
-          compCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: hostAmId });
-
+          compCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: [{ id: hostAmId }] });
         if (person.channel && CHANNEL_MAP[person.channel] !== undefined)
           compCustomFields.push({ id: '51cc21fe-e3ff-4daa-885d-bdb5305456b9', value: CHANNEL_MAP[person.channel] });
-
         if (person.chatName)
           compCustomFields.push({ id: '669ba179-3fad-45c3-9c83-9a557f46a7ea', value: person.chatName });
-
-        // В послугах = Новий (orderindex 1)
+        // В послугах = Новий
         compCustomFields.push({ id: 'b9d0306f-1a0d-4e80-9faf-6cff2e7e73d7', value: 1 });
 
-        // Засновники (до 5)
-        const founderFields = [
+        // Засновники
+        const founderNameFields = [
           'd5c651c0-d603-44f1-8ab1-73b7b641710d',
           '3f84861a-55d0-4190-8f75-9badc24fe0a5',
           '8c8db650-c594-4be9-ae83-1db534aa9e74',
           '7be35d79-270c-47a9-90d4-e11eef8b65b6',
           '74d51780-7746-4e01-bc57-670f6943c4ea',
         ];
-        const shareFields = [
+        const founderShareFields = [
           'ed53f2c2-cad9-4ae0-ac16-c75a013e8829',
           '3d858a57-9def-4d88-bc7b-53960c722aca',
           '662cfe04-8e63-49f5-8053-2ab60aac9cbb',
           '489e3a92-c65f-4a66-bf58-722866d92b45',
           'e06d411c-8ad5-4870-b56f-4b63143134a1',
         ];
-
-        (founders || []).forEach((f, i) => {
-          if (i >= 5) return;
-          if (f.name) compCustomFields.push({ id: founderFields[i], value: f.name });
-          if (f.share) compCustomFields.push({ id: shareFields[i], value: parseFloat(f.share) });
+        (founders || []).slice(0, 5).forEach((f, i) => {
+          if (f.name) compCustomFields.push({ id: founderNameFields[i], value: f.name });
+          if (f.share) compCustomFields.push({ id: founderShareFields[i], value: parseFloat(f.share) });
         });
-
-        // Кількість засновників
         if (founders && founders.length > 0) {
-          const countIdx = Math.min(founders.length - 1, 2); // 1=0, 2=1, 3=2
-          compCustomFields.push({ id: '316a1806-d5ec-43e8-8f0c-44d9508ddce6', value: countIdx });
+          compCustomFields.push({ id: '316a1806-d5ec-43e8-8f0c-44d9508ddce6', value: Math.min(founders.length - 1, 2) });
         }
 
         const compTask = await cuPost('/list/901520817116/task', {
@@ -205,7 +183,7 @@ exports.handler = async function(event) {
         value: { add: [foTask.id] }
       });
 
-      // 4. Отримати services_list_id + динамічну field map
+      // 4. Динамічна field map для Послуги клієнтам
       const servicesListId = SERVICES_LISTS[company.jurisdiction];
       let fieldMap = {};
       if (servicesListId) {
@@ -217,7 +195,7 @@ exports.handler = async function(event) {
         }
       }
 
-      // 5. Створити задачу компанії в «Послуги клієнтам/[Юрисдикція]»
+      // 5. Створити задачу компанії в «Послуги клієнтам»
       let serviceCompanyTaskId = null;
       if (servicesListId) {
         const scTask = await cuPost(`/list/${servicesListId}/task`, {
@@ -230,7 +208,7 @@ exports.handler = async function(event) {
         }
       }
 
-      // 6. По кожній послузі → створити задачу в JURISDICTIONS + прив'язати
+      // 6. Задачі послуг
       for (const service of (services || [])) {
         const sTask = await cuPost(`/list/${service.listId}/task`, {
           name: `${company.name} — ${service.name}`,
