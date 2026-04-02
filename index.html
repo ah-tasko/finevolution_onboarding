@@ -494,8 +494,31 @@
   }
   .other-hint span { color: var(--accent2); }
 
-  /* Config banner */
-  .config-banner {
+  .founder-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 36px;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+  .founder-remove {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    height: 36px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .founder-remove:hover { border-color: var(--error); color: var(--error); }
+
+
     width: 100%;
     max-width: 720px;
     background: rgba(253,121,168,0.08);
@@ -714,6 +737,14 @@
         <div class="option-desc">Компанія вже існує — потрібні послуги</div>
       </label>
     </div>
+  </div>
+
+  <!-- Засновники -->
+  <div class="field-group" style="margin-top:8px;">
+    <label>Засновники / Бенефіціари</label>
+    <div id="foundersList"></div>
+    <button type="button" class="btn btn-secondary" style="margin-top:8px;font-size:13px;padding:8px 16px;" onclick="addFounder()">+ Додати засновника</button>
+    <div class="other-hint">До 5 осіб. Вказуйте ПІБ та частку %</div>
   </div>
 
   <div class="btn-row">
@@ -1219,8 +1250,38 @@ function renderSummary() {
 }
 
 // =============================================
-// SUBMIT & CLAUDE PROCESSING
+// FOUNDERS
 // =============================================
+let founders = [];
+
+function addFounder() {
+  if (founders.length >= 5) return;
+  founders.push({ name: '', share: '' });
+  renderFounders();
+}
+
+function removeFounder(i) {
+  founders.splice(i, 1);
+  renderFounders();
+}
+
+function renderFounders() {
+  const container = document.getElementById('foundersList');
+  if (!container) return;
+  container.innerHTML = founders.map((f, i) => `
+    <div class="founder-row">
+      <input type="text" placeholder="ПІБ або назва компанії"
+        value="${f.name}" oninput="founders[${i}].name=this.value"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      <input type="number" placeholder="Частка %" min="0" max="100"
+        value="${f.share}" oninput="founders[${i}].share=this.value"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      <button class="founder-remove" onclick="removeFounder(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+
 async function submitForm() {
   const overlay = document.getElementById('processingOverlay');
   overlay.classList.add('active');
@@ -1274,6 +1335,7 @@ async function submitForm() {
         company: formData.company,
         services: formData.services,
         otherService: formData.otherService,
+        founders: founders.filter(f => f.name.trim()),
       })
     });
 
@@ -1312,6 +1374,8 @@ function showSuccess(links) {
 function resetForm() {
   document.getElementById('successCard').classList.remove('active');
   currentStep = 1;
+  founders = [];
+  renderFounders();
   selectedServices = [];
   selectedType = null;
   document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach(el => el.value = '');
