@@ -543,7 +543,7 @@
   <div class="logo">F</div>
   <div class="header-text">
     <h1>Новий клієнт</h1>
-    <p>Finevolution — онбординг клієнта</p>
+    <p>Finevolution — онбординг менеджера</p>
   </div>
 </div>
 
@@ -643,16 +643,6 @@
         <option>Люксембург</option><option>Ірландія</option><option>Інше</option>
       </select>
     </div>
-  </div>
-
-  <div class="field-group">
-    <label>Host AM <span class="req">*</span></label>
-    <select id="hostAm">
-      <option value="">— Оберіть менеджера —</option>
-      <option value="Anzhela Kameneva">Анжела Каменєва</option>
-      <option value="Olena Kucheriuk">Олена Кучерюк</option>
-      <option value="Olesia Padalka">Олеся Падалка</option>
-    </select>
   </div>
 
   <div class="field-group">
@@ -1135,7 +1125,6 @@ function validateStep(n) {
   if (n === 1) {
     if (!document.getElementById('lastName').value.trim()) { alert('Вкажіть прізвище клієнта'); return false; }
     if (!document.getElementById('firstName').value.trim()) { alert('Вкажіть ім\'я клієнта'); return false; }
-    if (!document.getElementById('hostAm').value) { alert('Оберіть Host AM'); return false; }
   }
   if (n === 2) {
     if (!document.getElementById('companyName').value.trim()) { alert('Вкажіть назву компанії'); return false; }
@@ -1228,7 +1217,7 @@ function renderSummary() {
     ['💬 Канал', `${document.getElementById('channel').value || '—'} ${document.getElementById('chatName').value || ''}`.trim()],
     ['🌍 Громадянство', document.getElementById('citizenship').value || '—'],
     ['🏦 Податкове резидентство', document.getElementById('taxResidency').value || '—'],
-    ['👔 Host AM', document.getElementById('hostAm').value || '—'],
+    ['👔 Host AM', 'Olena Kucheriuk (автоматично)'],
     ['🏢 Компанія', document.getElementById('companyName').value],
     ['📍 Юрисдикція', jurisdiction || '—'],
     ['📋 Тип запиту', selectedType === 'new' ? '🏗️ Реєстрація нової компанії' : '📂 Обслуговування існуючої'],
@@ -1307,7 +1296,6 @@ async function submitForm() {
       chatName: document.getElementById('chatName').value,
       citizenship: document.getElementById('citizenship').value,
       taxResidency: document.getElementById('taxResidency').value,
-      hostAm: document.getElementById('hostAm').value,
       notes: document.getElementById('notes').value,
     },
     company: {
