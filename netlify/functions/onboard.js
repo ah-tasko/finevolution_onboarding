@@ -28,8 +28,8 @@ exports.handler = async function(event) {
     return r.json();
   }
 
-  // Olena Kucheriuk — призначається на всі задачі автоматично
-  const DEFAULT_ASSIGNEE = '106604125';
+  // Всі задачі призначаються Олені — вона розподіляє вручну
+  const ASSIGNEES = ['106604125'];
 
   const SERVICES_LISTS = {
     'ESTONIA':        '901522300107',
@@ -60,15 +60,12 @@ exports.handler = async function(event) {
     'Мальта':11,'Німеччина':12,'ОАЕ (UAE)':13,'Польща':14,'Румунія':15,
     'США':16,'Угорщина':17,'Франція':18,'Чехія':19,'Швейцарія':20,'Литва':21,
   };
-
   const TAX_RESIDENCY_MAP = {
     'Україна':0,'Кіпр':1,'Естонія':2,'Польща':3,'Велика Британія':4,'США':5,
     'ОАЕ':6,'Нідерланди':7,'Німеччина':8,'Австрія':9,'Швейцарія':10,'Мальта':11,
     'Люксембург':12,'Ірландія':13,'Інше':14,
   };
-
   const CHANNEL_MAP = { 'Signal':0, 'Telegram':1, 'WhatsApp':2 };
-
   const REG_COUNTRY_MAP = {
     'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
     'Ірландія':5,'Іспанія':6,'Італія':7,'Індонезія':8,'Канада':9,'Кіпр':10,
@@ -110,7 +107,7 @@ exports.handler = async function(event) {
       // 1. Створити ФО
       const foTask = await cuPost('/list/901521194778/task', {
         name: foName,
-        assignees: [DEFAULT_ASSIGNEE],
+        assignees: ASSIGNEES,
         custom_fields: foCustomFields,
       });
       if (!foTask.id) throw new Error(`ФО не створено: ${JSON.stringify(foTask)}`);
@@ -167,7 +164,7 @@ exports.handler = async function(event) {
 
         const compTask = await cuPost('/list/901520817116/task', {
           name: company.name,
-          assignees: [DEFAULT_ASSIGNEE],
+          assignees: ASSIGNEES,
           custom_fields: compCustomFields,
         });
         if (!compTask.id) throw new Error(`Компанія не створена: ${JSON.stringify(compTask)}`);
@@ -183,59 +180,26 @@ exports.handler = async function(event) {
         value: { add: [foTask.id] }
       });
 
-      // 4. Динамічна field map для Послуги клієнтам
-      const servicesListId = SERVICES_LISTS[company.jurisdiction];
-      let fieldMap = {};
-      if (servicesListId) {
-        const fieldsResp = await cuGet(`/list/${servicesListId}/fields`);
-        for (const f of (fieldsResp.fields || [])) {
-          if (f.type === 'list_relationship' && f.type_config?.subcategory_id) {
-            fieldMap[f.type_config.subcategory_id] = f.id;
-          }
-        }
-      }
-
-      // 5. Задача компанії в «Послуги клієнтам»
-      let serviceCompanyTaskId = null;
-      if (servicesListId) {
-        const scTask = await cuPost(`/list/${servicesListId}/task`, {
-          name: company.name,
-          assignees: [DEFAULT_ASSIGNEE],
-          description: `👤 ${foName}`,
-        });
-        if (scTask.id) {
-          serviceCompanyTaskId = scTask.id;
-          results.created.push({ label: `📁 ${company.name} (послуги)`, url: scTask.url });
-        }
-      }
-
-      // 6. Задачі послуг
+      // 4. Задачі послуг в JURISDICTIONS
       for (const service of (services || [])) {
         const sTask = await cuPost(`/list/${service.listId}/task`, {
           name: `${company.name} — ${service.name}`,
-          assignees: [DEFAULT_ASSIGNEE],
+          assignees: ASSIGNEES,
           description: `👤 ${foName}`,
         });
         if (sTask.id) {
           results.created.push({ label: `📋 ${service.name}`, url: sTask.url });
-          if (serviceCompanyTaskId) {
-            const fieldId = fieldMap[service.listId];
-            if (fieldId) {
-              await cuPost(`/task/${serviceCompanyTaskId}/field/${fieldId}`, {
-                value: { add: [sTask.id] }
-              });
-            }
-          }
         } else {
           results.errors.push(`${service.name}: ${JSON.stringify(sTask)}`);
         }
       }
 
-      // 7. Інша послуга
+      // 5. Інша послуга
+      const servicesListId = SERVICES_LISTS[company.jurisdiction];
       if (otherService && servicesListId) {
         const otherTask = await cuPost(`/list/${servicesListId}/task`, {
           name: `⚡ НОВА: ${company.name} — ${otherService}`,
-          assignees: [DEFAULT_ASSIGNEE],
+          assignees: ASSIGNEES,
           description: `👤 ${foName}\n⚠️ Потребує уточнення шаблону`,
         });
         if (otherTask.id)
