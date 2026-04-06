@@ -28,6 +28,9 @@ exports.handler = async function(event) {
     return r.json();
   }
 
+  // Olena Kucheriuk — призначається на всі задачі автоматично
+  const DEFAULT_ASSIGNEE = '106604125';
+
   const SERVICES_LISTS = {
     'ESTONIA':        '901522300107',
     'USA':            '901522318620',
@@ -51,24 +54,21 @@ exports.handler = async function(event) {
     'Ireland':        '901522378546',
   };
 
-  const HOST_AM_IDS = {
-    'Anzhela Kameneva':   106604124,
-    'Olena Kucheriuk':    106604125,
-    'Nataliia Haikalova': 236532973,
-  };
-
   const CITIZENSHIP_MAP = {
     'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
     'Ірландія':5,'Іспанія':6,'Італія':7,'Індонезія':8,'Канада':9,'Кіпр':10,
     'Мальта':11,'Німеччина':12,'ОАЕ (UAE)':13,'Польща':14,'Румунія':15,
     'США':16,'Угорщина':17,'Франція':18,'Чехія':19,'Швейцарія':20,'Литва':21,
   };
+
   const TAX_RESIDENCY_MAP = {
     'Україна':0,'Кіпр':1,'Естонія':2,'Польща':3,'Велика Британія':4,'США':5,
     'ОАЕ':6,'Нідерланди':7,'Німеччина':8,'Австрія':9,'Швейцарія':10,'Мальта':11,
     'Люксембург':12,'Ірландія':13,'Інше':14,
   };
+
   const CHANNEL_MAP = { 'Signal':0, 'Telegram':1, 'WhatsApp':2 };
+
   const REG_COUNTRY_MAP = {
     'Україна':0,'Болгарія':1,'Велика Британія':2,'Гонконг':3,'Естонія':4,
     'Ірландія':5,'Іспанія':6,'Італія':7,'Індонезія':8,'Канада':9,'Кіпр':10,
@@ -85,8 +85,6 @@ exports.handler = async function(event) {
       const foName = [person.lastName, person.firstName, person.middleName]
         .filter(Boolean).join(' ');
 
-      const hostAmId = HOST_AM_IDS[person.hostAm] || null;
-
       // ── Кастомні поля ФО ──
       const foCustomFields = [];
 
@@ -102,8 +100,9 @@ exports.handler = async function(event) {
         foCustomFields.push({ id: '092a8da6-3b4e-47ef-97a6-902eb10bc5b8', value: CITIZENSHIP_MAP[person.citizenship] });
       if (person.taxResidency && TAX_RESIDENCY_MAP[person.taxResidency] !== undefined)
         foCustomFields.push({ id: 'e1c1ccc2-ab7a-42e7-b305-1cf08a036a59', value: TAX_RESIDENCY_MAP[person.taxResidency] });
-      if (hostAmId)
-        foCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: [{ id: hostAmId }] });
+      // Host AM = Olena автоматично
+      foCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: [{ id: 106604125 }] });
+      // Client Onboarding Date = сьогодні
       foCustomFields.push({ id: 'fe92b020-8b72-4c96-8216-bff0758791f3', value: Date.now() });
       if (person.notes)
         foCustomFields.push({ id: '3dd54127-2750-4ef4-ae8d-ac61cfc0243c', value: person.notes });
@@ -111,6 +110,7 @@ exports.handler = async function(event) {
       // 1. Створити ФО
       const foTask = await cuPost('/list/901521194778/task', {
         name: foName,
+        assignees: [DEFAULT_ASSIGNEE],
         custom_fields: foCustomFields,
       });
       if (!foTask.id) throw new Error(`ФО не створено: ${JSON.stringify(foTask)}`);
@@ -134,8 +134,8 @@ exports.handler = async function(event) {
 
         if (company.regCountry && REG_COUNTRY_MAP[company.regCountry] !== undefined)
           compCustomFields.push({ id: '5eefba69-8e39-4b99-9097-937140c7fc92', value: REG_COUNTRY_MAP[company.regCountry] });
-        if (hostAmId)
-          compCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: [{ id: hostAmId }] });
+        // Host AM = Olena автоматично
+        compCustomFields.push({ id: 'c6589add-5d8d-4a21-903f-0e4f6ee9903b', value: [{ id: 106604125 }] });
         if (person.channel && CHANNEL_MAP[person.channel] !== undefined)
           compCustomFields.push({ id: '51cc21fe-e3ff-4daa-885d-bdb5305456b9', value: CHANNEL_MAP[person.channel] });
         if (person.chatName)
@@ -143,7 +143,7 @@ exports.handler = async function(event) {
         // В послугах = Новий
         compCustomFields.push({ id: 'b9d0306f-1a0d-4e80-9faf-6cff2e7e73d7', value: 1 });
 
-        // Засновники
+        // Засновники (до 5)
         const founderNameFields = [
           'd5c651c0-d603-44f1-8ab1-73b7b641710d',
           '3f84861a-55d0-4190-8f75-9badc24fe0a5',
@@ -162,12 +162,12 @@ exports.handler = async function(event) {
           if (f.name) compCustomFields.push({ id: founderNameFields[i], value: f.name });
           if (f.share) compCustomFields.push({ id: founderShareFields[i], value: parseFloat(f.share) });
         });
-        if (founders && founders.length > 0) {
+        if (founders && founders.length > 0)
           compCustomFields.push({ id: '316a1806-d5ec-43e8-8f0c-44d9508ddce6', value: Math.min(founders.length - 1, 2) });
-        }
 
         const compTask = await cuPost('/list/901520817116/task', {
           name: company.name,
+          assignees: [DEFAULT_ASSIGNEE],
           custom_fields: compCustomFields,
         });
         if (!compTask.id) throw new Error(`Компанія не створена: ${JSON.stringify(compTask)}`);
@@ -195,12 +195,13 @@ exports.handler = async function(event) {
         }
       }
 
-      // 5. Створити задачу компанії в «Послуги клієнтам»
+      // 5. Задача компанії в «Послуги клієнтам»
       let serviceCompanyTaskId = null;
       if (servicesListId) {
         const scTask = await cuPost(`/list/${servicesListId}/task`, {
           name: company.name,
-          description: `👤 ${foName}\n👔 ${person.hostAm}`,
+          assignees: [DEFAULT_ASSIGNEE],
+          description: `👤 ${foName}`,
         });
         if (scTask.id) {
           serviceCompanyTaskId = scTask.id;
@@ -212,7 +213,8 @@ exports.handler = async function(event) {
       for (const service of (services || [])) {
         const sTask = await cuPost(`/list/${service.listId}/task`, {
           name: `${company.name} — ${service.name}`,
-          description: `👤 ${foName}\n👔 ${person.hostAm}`,
+          assignees: [DEFAULT_ASSIGNEE],
+          description: `👤 ${foName}`,
         });
         if (sTask.id) {
           results.created.push({ label: `📋 ${service.name}`, url: sTask.url });
@@ -233,11 +235,11 @@ exports.handler = async function(event) {
       if (otherService && servicesListId) {
         const otherTask = await cuPost(`/list/${servicesListId}/task`, {
           name: `⚡ НОВА: ${company.name} — ${otherService}`,
-          description: `👤 ${foName}\n👔 ${person.hostAm}\n⚠️ Потребує уточнення шаблону`,
+          assignees: [DEFAULT_ASSIGNEE],
+          description: `👤 ${foName}\n⚠️ Потребує уточнення шаблону`,
         });
-        if (otherTask.id) {
+        if (otherTask.id)
           results.created.push({ label: `⚡ ${otherService}`, url: otherTask.url });
-        }
       }
 
       return {
