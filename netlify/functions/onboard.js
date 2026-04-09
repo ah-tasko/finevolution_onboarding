@@ -31,27 +31,28 @@ exports.handler = async function(event) {
   // Всі задачі призначаються Олені — вона розподіляє вручну
   const ASSIGNEES = ['106604125'];
 
-  const SERVICES_LISTS = {
-    'ESTONIA':        '901522300107',
-    'USA':            '901522318620',
-    'Cyrpus':         '901522378371',
-    'UK':             '901522378372',
-    'Switzerland':    '901522378373',
-    'Hong Kong':      '901522378374',
-    'Spain':          '901522378375',
-    'Czech Republic': '901522378376',
-    'Portugal':       '901522378377',
-    'Romania':        '901522378378',
-    'Hungary':        '901522378379',
-    'Lithuania':      '901522378380',
-    'Slovakia':       '901522378381',
-    'Germany':        '901522378382',
-    'UAE':            '901522378383',
-    'Singapore':      '901522378384',
-    'Ukraine':        '901522378385',
-    'Poland':         '901522378386',
-    'Latvia':         '901522378387',
-    'Ireland':        '901522378546',
+  // «Інші питання та задачі» — по юрисдикціях
+  const OTHER_TASKS_LISTS = {
+    'Ukraine':        '901522640577',
+    'ESTONIA':        '901522640578',
+    'USA':            '901522640579',
+    'Cyrpus':         '901522640582',
+    'Switzerland':    '901522640587',
+    'Hong Kong':      '901522640588',
+    'UK':             '901522660819',
+    'Poland':         '901522660834',
+    'Spain':          '901522660848',
+    'Portugal':       '901522660858',
+    'Romania':        '901522660870',
+    'Latvia':         '901522660882',
+    'Hungary':        '901522660959',
+    'Lithuania':      '901522660964',
+    'Slovakia':       '901522660969',
+    'Germany':        '901522660980',
+    'Ireland':        '901522660998',
+    'UAE':            '901522661004',
+    'Singapore':      '901522661006',
+    'Czech Republic': '901522640612',
   };
 
   const CITIZENSHIP_MAP = {
@@ -180,7 +181,7 @@ exports.handler = async function(event) {
         value: { add: [foTask.id] }
       });
 
-      // 4. Задачі послуг в JURISDICTIONS
+      // 4. Задачі послуг в JURISDICTIONS + лінк до Компанії
       for (const service of (services || [])) {
         const sTask = await cuPost(`/list/${service.listId}/task`, {
           name: `${company.name} — ${service.name}`,
@@ -189,21 +190,25 @@ exports.handler = async function(event) {
         });
         if (sTask.id) {
           results.created.push({ label: `📋 ${service.name}`, url: sTask.url });
+          // Лінк: задача послуги → задача компанії
+          await cuPost(`/task/${sTask.id}/link/${companyTaskId}`, {});
         } else {
           results.errors.push(`${service.name}: ${JSON.stringify(sTask)}`);
         }
       }
 
-      // 5. Інша послуга
-      const servicesListId = SERVICES_LISTS[company.jurisdiction];
-      if (otherService && servicesListId) {
-        const otherTask = await cuPost(`/list/${servicesListId}/task`, {
+      // 5. Інша послуга → «Інші питання та задачі» + лінк до Компанії
+      const otherTasksListId = OTHER_TASKS_LISTS[company.jurisdiction];
+      if (otherService && otherTasksListId) {
+        const otherTask = await cuPost(`/list/${otherTasksListId}/task`, {
           name: `⚡ НОВА: ${company.name} — ${otherService}`,
           assignees: ASSIGNEES,
           description: `👤 ${foName}\n⚠️ Потребує уточнення шаблону`,
         });
-        if (otherTask.id)
+        if (otherTask.id) {
           results.created.push({ label: `⚡ ${otherService}`, url: otherTask.url });
+          await cuPost(`/task/${otherTask.id}/link/${companyTaskId}`, {});
+        }
       }
 
       return {
