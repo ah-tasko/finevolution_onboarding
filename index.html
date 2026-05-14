@@ -691,6 +691,7 @@
         <option value="Ireland">🇮🇪 Ірландія</option>
         <option value="UAE">🇦🇪 ОАЕ</option>
         <option value="Singapore">🇸🇬 Сінгапур</option>
+        <option value="Bulgaria">🇧🇬 Болгарія</option>
       </select>
     </div>
     <div class="field-group">
@@ -705,27 +706,6 @@
         <option>Румунія</option><option>США</option><option>Угорщина</option>
         <option>Швейцарія</option><option>Чехія</option><option>Литва</option><option>Сінгапур</option>
       </select>
-    </div>
-  </div>
-
-  <!-- Registration type -->
-  <div class="field-group">
-    <label>Тип запиту <span class="req">*</span></label>
-    <div class="option-grid">
-      <label class="option-card" id="opt-new" onclick="selectType('new')">
-        <input type="radio" name="reqType" value="new">
-        <div class="option-check"></div>
-        <span class="option-icon">🏗️</span>
-        <div class="option-title">Реєстрація нової компанії</div>
-        <div class="option-desc">Клієнт хоче зареєструвати нову юридичну особу</div>
-      </label>
-      <label class="option-card" id="opt-existing" onclick="selectType('existing')">
-        <input type="radio" name="reqType" value="existing">
-        <div class="option-check"></div>
-        <span class="option-icon">📂</span>
-        <div class="option-title">Обслуговування існуючої</div>
-        <div class="option-desc">Компанія вже існує — потрібні послуги</div>
-      </label>
     </div>
   </div>
 
@@ -821,7 +801,6 @@ const JURISDICTIONS = {
     folderId: "901514746628",
     registrationListId: "901521630328",
     services: [
-      { name: "Послуги в Україні", id: "901521630326" },
       { name: "(UA) Реєстрація ФОП", id: "901522302206" },
       { name: "(UA) Ліквідація ФОП", id: "901522302207" },
       { name: "(UA) Подача нульового звіту ФОП", id: "901522302208" },
@@ -837,9 +816,8 @@ const JURISDICTIONS = {
     folderId: "901514131372",
     registrationListId: "901520832634",
     services: [
-      { name: "Послуги в Естонії", id: "901521628386" },
       { name: "(EE) Нульовий річний звіт", id: "901522300505" },
-      { name: "(EE) Реєстрація VAT offline", id: "901522300508" },
+      { name: "(EE) Реєстрація VAT offline по дорученню", id: "901522300508" },
       { name: "(EE) Ліквідація компанії", id: "901522300509" },
       { name: "(EE) Сертифікат податкового резидентства", id: "901522300512" },
       { name: "(EE) Перереєстрація компанії", id: "901522300513" },
@@ -848,44 +826,65 @@ const JURISDICTIONS = {
       { name: "(EE) Реєстрація VAT online", id: "901522300522" },
       { name: "(EE) Замовлення пакету документів", id: "901522300523" },
       { name: "(EE) Річний звіт", id: "901522300524" },
+      { name: "(EE) Пошук офісу", id: "901522300525" },
+      { name: "(EE) Резерв назви компанії", id: "901522300526" },
+      { name: "(EE) Купівля та відправка сім-картки", id: "901522300528" },
       { name: "(EE) Реєстрація компанії e-residency", id: "901522300529" },
       { name: "(EE) Реєстрація компанії нотаріальна", id: "901522300530" },
     ]
   },
   "USA": {
     folderId: "901514131383",
-    registrationListId: "901521628742",
+    registrationListId: "901522302294",
     services: [
-      { name: "Послуги в USA", id: "901520832650" },
       { name: "US Bookkeeping / Financial Statements", id: "901522001149" },
       { name: "US Tax Return", id: "901522001152" },
+      { name: "US Personal tax", id: "901522627597" },
       { name: "Реєстрація компанії в Делавері", id: "901522302294" },
-      { name: "Annual report / Franchise Tax", id: "901522302295" },
+      { name: "Annual report в штаті по франчайз податку США", id: "901522302295" },
       { name: "Звіт BOI", id: "901522302299" },
+      { name: "Пошук офісу в США", id: "901522302300" },
+      { name: "Дзвінок CPA в IRS США", id: "901522302303" },
+      { name: "Зміна засновників через операційну угоду в США", id: "901522302305" },
       { name: "Отримання ITIN в США", id: "901522302308" },
       { name: "Нульова податкова декларація в США", id: "901522302312" },
+      { name: "Bookkeeping в США погодинно", id: "901522302315" },
+      { name: "Звіт BE12", id: "901522302316" },
       { name: "Податкова декларація компанії в США", id: "901522302317" },
       { name: "Ліквідація компанії в США", id: "901522302318" },
       { name: "Податкова декларація фізособи в США", id: "901522302319" },
       { name: "Реєстрація компанії в Техасі", id: "901522302321" },
-      { name: "Реєстрація компанії в Вайомінгу", id: "901522302635" },
+      { name: "Додаткове мито за пришвидшену реєстрацію в США", id: "901522302323" },
+      { name: "Форма на зміну адреси в США", id: "901522302324" },
       { name: "Юридична адреса на 1 рік США", id: "901522302326" },
+      { name: "Реєстрація компанії в Вайомінгу", id: "901522302635" },
+      { name: "Реєстрація компанії в інших штатах", id: "901522302636" },
     ]
   },
   "Cyrpus": {
     folderId: "901514131391",
-    registrationListId: "901521628834",
+    registrationListId: "901522302214",
     services: [
-      { name: "Послуги на Кіпрі", id: "901520832659" },
       { name: "Корпоративний сервіс (Annual Renewal)", id: "901522122531" },
       { name: "Бухгалтерський облік (Accounting)", id: "901522122533" },
       { name: "Аудит та закриття фінансового року", id: "901522122535" },
+      { name: "Відкриття рахунку (Unlimint / Payoneer / Bank)", id: "901522122580" },
       { name: "(CY) Реєстрація компанії", id: "901522302214" },
       { name: "(CY) Ліквідація компанії", id: "901522302215" },
-      { name: "(CY) Реєстрація VAT", id: "901522302220" },
+      { name: "(CY) Верифікація директора для платіжної системи", id: "901522302216" },
+      { name: "(CY) Звіт HE32", id: "901522302217" },
+      { name: "(CY) Strike-off компанії", id: "901522302218" },
       { name: "(CY) Аудит 1 рік", id: "901522302219" },
-      { name: "(CY) Пролонгація компанії на 1 рік", id: "901522302231" },
+      { name: "(CY) Реєстрація VAT", id: "901522302220" },
+      { name: "(CY) Випуск довіреності з апостилем", id: "901522302221" },
+      { name: "(CY) Сабстенс", id: "901522302222" },
+      { name: "(CY) Отримання TIC номеру", id: "901522302223" },
+      { name: "(CY) Відкриття рахунку в Unlimint", id: "901522302225" },
       { name: "(CY) Перереєстрація компанії", id: "901522302226" },
+      { name: "(CY) Випуск довіреності без апостиля", id: "901522302228" },
+      { name: "(CY) Пролонгація компанії на 1 рік", id: "901522302231" },
+      { name: "(CY) Сплата муніципального податку", id: "901522302232" },
+      { name: "(CY) Внесення UBO в реєстр", id: "901522302233" },
       { name: "(CY) Замовлення пакету документів", id: "901522302239" },
       { name: "(CY) Бухгалтерія 1 рік", id: "901522302242" },
     ]
@@ -894,11 +893,12 @@ const JURISDICTIONS = {
     folderId: "901514131424",
     registrationListId: "901521629501",
     services: [
-      { name: "Послуги в Швейцарії", id: "901521629471" },
+      { name: "(CH) Реєстрація компанії", id: "901521629501" },
       { name: "(CH) Юридична адреса на 1 рік", id: "901522302345" },
       { name: "(CH) Банківський рахунок", id: "901522302348" },
       { name: "(CH) Бухгалтерія за 1 рік", id: "901522302349" },
       { name: "(CH) Перереєстрація компанії", id: "901522302350" },
+      { name: "(CH) Швейцарський директор-резидент на 1 рік", id: "901522302351" },
       { name: "(CH) Реєстрація ПДВ", id: "901522302352" },
       { name: "(CH) Замовлення пакету документів", id: "901522304423" },
     ]
@@ -907,13 +907,14 @@ const JURISDICTIONS = {
     folderId: "901514131450",
     registrationListId: "901521629328",
     services: [
-      { name: "Послуги в Гонконзі", id: "901521629232" },
+      { name: "(HK) Реєстрація компанії", id: "901521629328" },
       { name: "Пролонгація компанії (Annual Renewal)", id: "901522122397" },
       { name: "Бухгалтерський облік (Accounting)", id: "901522122398" },
       { name: "Аудит та податкові подачі (Audit & PTR)", id: "901522122402" },
-      { name: "(HK) Реєстрація компанії", id: "901522302375" },
-      { name: "(HK) Ліквідація компанії", id: "901522302378" },
+      { name: "(HK) Юридична адреса на 1 рік", id: "901522302354" },
       { name: "(HK) Перереєстрація компанії", id: "901522302374" },
+      { name: "(HK) Бухгалтерія та аудит за 1 рік", id: "901522302377" },
+      { name: "(HK) Ліквідація компанії", id: "901522302378" },
       { name: "(HK) Замовлення пакету документів з апостилем", id: "901522302379" },
     ]
   },
@@ -921,39 +922,43 @@ const JURISDICTIONS = {
     folderId: "901514360273",
     registrationListId: "901521130950",
     services: [
-      { name: "Послуги у Великій Британії", id: "901521628868" },
+      { name: "(UK) Реєстрація компанії", id: "901521130950" },
       { name: "Пролонгація (Confirmation Statement)", id: "901522122653" },
       { name: "Бухгалтерський облік (Accounting)", id: "901522122654" },
       { name: "VAT — перевірка та звітність", id: "901522122655" },
-      { name: "(UK) Реєстрація компанії", id: "901522302250" },
       { name: "(UK) Перереєстрація компанії", id: "901522302244" },
       { name: "(UK) Реєстрація ПДВ", id: "901522302245" },
       { name: "(UK) Ліквідація компанії", id: "901522302246" },
-      { name: "(UK) Річний звіт", id: "901522302249" },
-      { name: "(UK) Юридична адреса на 1 рік", id: "901522302255" },
       { name: "(UK) Замовлення пакету документів", id: "901522302247" },
+      { name: "(UK) Річний звіт", id: "901522302249" },
+      { name: "(UK) Пошук офісу", id: "901522302252" },
+      { name: "(UK) Нульовий звіт", id: "901522302254" },
+      { name: "(UK) Юридична адреса на 1 рік", id: "901522302255" },
+      { name: "(UK) Прийом кореспонденції на 1 рік", id: "901522302258" },
     ]
   },
   "Poland": {
     folderId: "901514744957",
     registrationListId: "901521628239",
     services: [
-      { name: "Послуги в Польщі", id: "901521628181" },
-      { name: "(PL) Реєстрація компанії", id: "901522302338" },
-      { name: "(PL) Реєстрація ІП", id: "901522302339" },
+      { name: "(PL) Реєстрація компанії", id: "901521628239" },
       { name: "(PL) Ліквідація компанії", id: "901522302327" },
-      { name: "(PL) Перереєстрація компанії", id: "901522304430" },
-      { name: "(PL) Перереєстрація ІП", id: "901522302337" },
       { name: "(PL) Сертифікат податкового резидентства", id: "901522302333" },
       { name: "(PL) Отримання PESEL та Profil zaufane", id: "901522302335" },
       { name: "(PL) Замовлення пакету документів", id: "901522302336" },
+      { name: "(PL) Перереєстрація ІП", id: "901522302337" },
+      { name: "(PL) Реєстрація ІП", id: "901522302339" },
+      { name: "(PL) Розморозка діяльності компанії", id: "901522302340" },
+      { name: "(PL) Супровід в банку", id: "901522302341" },
+      { name: "(PL) Перереєстрація компанії", id: "901522304430" },
+      { name: "(PL) Зупинка діяльності компанії", id: "901522304433" },
+      { name: "(PL) Юридична адреса на 1 рік", id: "901522663126" },
     ]
   },
   "Spain": {
     folderId: "901514745681",
-    registrationListId: "901521629192",
+    registrationListId: "901522302381",
     services: [
-      { name: "Послуги в Іспанії", id: "901521629133" },
       { name: "(ES) Реєстрація компанії", id: "901522302381" },
       { name: "(ES) Реєстрація ПДВ", id: "901522302382" },
       { name: "(ES) Юридична адреса на 1 рік", id: "901522302383" },
@@ -962,58 +967,55 @@ const JURISDICTIONS = {
   },
   "Czech Republic": {
     folderId: "901514746039",
-    registrationListId: "901521629529",
+    registrationListId: "901522302388",
     services: [
-      { name: "Послуги в Чехії", id: "901521629530" },
       { name: "(CZ) Реєстрація компанії", id: "901522302388" },
       { name: "(CZ) Реєстрація ПДВ", id: "901522302384" },
-      { name: "(CZ) Перереєстрація компанії", id: "901522302386" },
       { name: "(CZ) Оренда юридичної адреси на 1 рік", id: "901522302385" },
+      { name: "(CZ) Перереєстрація компанії", id: "901522302386" },
       { name: "(CZ) Купівля готової компанії", id: "901522302389" },
       { name: "(CZ) Замовлення пакету документів", id: "901522302390" },
     ]
   },
   "Portugal": {
     folderId: "901514746083",
-    registrationListId: "901521629591",
+    registrationListId: "901522302397",
     services: [
-      { name: "Послуги в Португалії", id: "901521629590" },
       { name: "(PT) Реєстрація компанії", id: "901522302397" },
       { name: "(PT) Реєстрація ПДВ", id: "901522302392" },
-      { name: "(PT) Оренда юридичної адреси на 1 рік", id: "901522302396" },
+      { name: "(PT) Консультація податкового консультанта", id: "901522302394" },
       { name: "(PT) Замовлення пакету документів", id: "901522302395" },
+      { name: "(PT) Оренда юридичної адреси на 1 рік", id: "901522302396" },
     ]
   },
   "Romania": {
     folderId: "901514746124",
-    registrationListId: "901521629644",
+    registrationListId: "901522302458",
     services: [
-      { name: "Послуги в Румунії", id: "901521629645" },
       { name: "(RO) Реєстрація компанії", id: "901522302458" },
+      { name: "(RO) Юридична адреса на 1 рік", id: "901522302459" },
       { name: "(RO) Перереєстрація компанії", id: "901522302461" },
       { name: "(RO) Реєстрація ПДВ", id: "901522302462" },
-      { name: "(RO) Юридична адреса на 1 рік", id: "901522302459" },
       { name: "(RO) Замовлення пакету документів", id: "901522302464" },
+      { name: "(RO) Відкриття банківського рахунку", id: "901522304421" },
     ]
   },
   "Latvia": {
     folderId: "901514746243",
-    registrationListId: "901521629810",
+    registrationListId: "901522302466",
     services: [
-      { name: "Послуги в Латвії", id: "901521629811" },
       { name: "(LV) Реєстрація компанії", id: "901522302466" },
-      { name: "(LV) Перереєстрація компанії", id: "901522302470" },
-      { name: "(LV) Реєстрація ПДВ", id: "901522302468" },
-      { name: "(LV) Оренда юридичної адреси на 1 рік", id: "901522302471" },
       { name: "(LV) Підключення системи бухгалтерії", id: "901522302467" },
+      { name: "(LV) Реєстрація ПДВ", id: "901522302468" },
       { name: "(LV) Отримання ЕЦП", id: "901522302469" },
+      { name: "(LV) Перереєстрація компанії", id: "901522302470" },
+      { name: "(LV) Оренда юридичної адреси на 1 рік", id: "901522302471" },
     ]
   },
   "Hungary": {
     folderId: "901514746294",
-    registrationListId: "901521629866",
+    registrationListId: "901522302474",
     services: [
-      { name: "Послуги в Угорщині", id: "901521629868" },
       { name: "(HU) Реєстрація компанії", id: "901522302474" },
       { name: "(HU) Перереєстрація компанії", id: "901522302473" },
       { name: "(HU) Юридична адреса на 1 рік", id: "901522302475" },
@@ -1022,23 +1024,25 @@ const JURISDICTIONS = {
   },
   "Lithuania": {
     folderId: "901514746329",
-    registrationListId: "901521629912",
+    registrationListId: "901522302543",
     services: [
-      { name: "Послуги в Литві", id: "901521629913" },
       { name: "(LT) Реєстрація компанії", id: "901522302543" },
       { name: "(LT) Реєстрація малого товариства", id: "901522302536" },
-      { name: "(LT) Перереєстрація компанії", id: "901522302538" },
+      { name: "(LT) Відкриття банківського рахунку", id: "901522302477" },
+      { name: "(LT) Реєстрація ПДВ МТ", id: "901522302480" },
+      { name: "(LT) Юридична адреса МТ на 1 рік", id: "901522302483" },
       { name: "(LT) Реєстрація ПДВ компанії", id: "901522302484" },
-      { name: "(LT) Юридична адреса компанії на 1 рік", id: "901522302537" },
       { name: "(LT) Відкриття рахунку в платіжній системі", id: "901522302533" },
+      { name: "(LT) Юридична адреса компанії на 1 рік", id: "901522302537" },
+      { name: "(LT) Перереєстрація компанії", id: "901522302538" },
+      { name: "(LT) Послуги загальні", id: "901522302541" },
       { name: "(LT) Замовлення пакету документів", id: "901522304434" },
     ]
   },
   "Slovakia": {
     folderId: "901514746405",
-    registrationListId: "901521630024",
+    registrationListId: "901522302548",
     services: [
-      { name: "Послуги в Словаччині", id: "901521630025" },
       { name: "(SK) Реєстрація компанії", id: "901522302548" },
       { name: "(SK) Перереєстрація компанії", id: "901522302546" },
       { name: "(SK) Реєстрація ПДВ", id: "901522302550" },
@@ -1048,33 +1052,30 @@ const JURISDICTIONS = {
   },
   "Germany": {
     folderId: "901514746464",
-    registrationListId: "901521630097",
+    registrationListId: "901522302556",
     services: [
-      { name: "Послуги в Німеччині", id: "901521630100" },
       { name: "(DE) Реєстрація компанії", id: "901522302556" },
-      { name: "(DE) Перереєстрація компанії", id: "901522302559" },
       { name: "(DE) Реєстрація ПДВ", id: "901522302554" },
+      { name: "(DE) Перереєстрація компанії", id: "901522302559" },
       { name: "(DE) Юридична адреса на 1 рік", id: "901522302560" },
       { name: "(DE) Замовлення пакету документів", id: "901522302558" },
     ]
   },
   "Ireland": {
     folderId: "901514746499",
-    registrationListId: "901521630145",
+    registrationListId: "901522302616",
     services: [
-      { name: "Послуги в Ірландії", id: "901521630146" },
       { name: "(IE) Реєстрація компанії", id: "901522302616" },
-      { name: "(IE) Перереєстрація компанії", id: "901522302617" },
       { name: "(IE) Реєстрація ПДВ", id: "901522302561" },
       { name: "(IE) Юридична адреса на 1 рік", id: "901522302562" },
+      { name: "(IE) Перереєстрація компанії", id: "901522302617" },
       { name: "(IE) Замовлення пакету документів", id: "901522302619" },
     ]
   },
   "UAE": {
     folderId: "901514746520",
-    registrationListId: "901521630181",
+    registrationListId: "901522302620",
     services: [
-      { name: "Послуги в ОАЕ", id: "901521630182" },
       { name: "(AE) Реєстрація компанії", id: "901522302620" },
       { name: "(AE) Перереєстрація компанії", id: "901522302622" },
       { name: "(AE) Юридична адреса на 1 рік", id: "901522302623" },
@@ -1083,16 +1084,23 @@ const JURISDICTIONS = {
   },
   "Singapore": {
     folderId: "901514746545",
-    registrationListId: "901521630216",
+    registrationListId: "901522302632",
     services: [
-      { name: "Послуги в Сінгапурі", id: "901521630217" },
       { name: "(SG) Реєстрація компанії", id: "901522302632" },
       { name: "(SG) Перереєстрація компанії", id: "901522304414" },
       { name: "(SG) Бухгалтерія", id: "901522302630" },
       { name: "(SG) Юридична адреса на 1 рік", id: "901522302629" },
       { name: "(SG) Юридичні послуги", id: "901522302631" },
       { name: "(SG) Міграційні послуги", id: "901522302627" },
+      { name: "(SG) Страхування відповідальності", id: "901522302624" },
       { name: "(SG) Замовлення пакету документів", id: "901522302625" },
+    ]
+  },
+  "Bulgaria": {
+    folderId: "901516001096",
+    registrationListId: "901523340028",
+    services: [
+      { name: "(BG) Юридична адреса на 1 рік", id: "901523340028" },
     ]
   }
 };
@@ -1102,7 +1110,6 @@ const JURISDICTIONS = {
 // =============================================
 let currentStep = 1;
 let selectedServices = []; // [{name, listId}]
-let selectedType = null;
 
 // =============================================
 // NAVIGATION
@@ -1129,7 +1136,6 @@ function validateStep(n) {
   if (n === 2) {
     if (!document.getElementById('companyName').value.trim()) { alert('Вкажіть назву компанії'); return false; }
     if (!document.getElementById('jurisdiction').value) { alert('Оберіть юрисдикцію'); return false; }
-    if (!selectedType) { alert('Оберіть тип запиту'); return false; }
   }
   return true;
 }
@@ -1141,15 +1147,6 @@ function updateStepIndicators() {
     if (i < currentStep) el.classList.add('done');
     else if (i === currentStep) el.classList.add('active');
   }
-}
-
-// =============================================
-// TYPE SELECTION
-// =============================================
-function selectType(type) {
-  selectedType = type;
-  document.getElementById('opt-new').classList.toggle('selected', type === 'new');
-  document.getElementById('opt-existing').classList.toggle('selected', type === 'existing');
 }
 
 // =============================================
@@ -1220,7 +1217,6 @@ function renderSummary() {
     ['👔 Host AM', 'Olena Kucheriuk (автоматично)'],
     ['🏢 Компанія', document.getElementById('companyName').value],
     ['📍 Юрисдикція', jurisdiction || '—'],
-    ['📋 Тип запиту', selectedType === 'new' ? '🏗️ Реєстрація нової компанії' : '📂 Обслуговування існуючої'],
     ['⚡ Послуги', selectedServices.length > 0 ? selectedServices.map(s => s.name).join(', ') : '—'],
     ['✏️ Інша послуга', otherService || '—'],
     ['📝 Нотатки', document.getElementById('notes').value || '—'],
@@ -1302,7 +1298,6 @@ async function submitForm() {
       name: document.getElementById('companyName').value,
       jurisdiction: jurisdiction,
       regCountry: document.getElementById('companyRegCountry').value,
-      type: selectedType,
       registrationListId: jData?.registrationListId,
     },
     services: selectedServices,
@@ -1365,10 +1360,8 @@ function resetForm() {
   founders = [];
   renderFounders();
   selectedServices = [];
-  selectedType = null;
   document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach(el => el.value = '');
   document.querySelectorAll('select').forEach(el => el.value = '');
-  document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
   document.getElementById('step1').classList.add('active');
   updateStepIndicators();
 }
